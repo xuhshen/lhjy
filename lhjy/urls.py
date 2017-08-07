@@ -16,8 +16,25 @@ Including another URLconf
 from django.conf.urls import url,include
 from django.contrib import admin
 
+from rest_framework import routers
+from examples import views
+
+from rest_framework.urlpatterns import format_suffix_patterns
+
+
+router = routers.DefaultRouter()
+router.register(r'users', views.UserViewSet)
+router.register(r'strategyuser', views.Strategy_userViewSet)
+# router.register(r'record', views.RecordViewSet)
+
+# urlpatterns = format_suffix_patterns(urlpatterns)
+
 urlpatterns = [
     url(r'^examples/', include('examples.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^', include(router.urls)),
+    url(r'^record/$', views.RecordViewSet.as_view()),
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
+
 

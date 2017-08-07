@@ -37,13 +37,12 @@ class Capitalaccount(models.Model):
 class Strategy_user(models.Model):
     '''策略账户：策略账户名，基金账户，总资金，可用资金
     '''
-    name = models.CharField(max_length=200,default=" ")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     capitalaccount = models.ForeignKey(Capitalaccount, on_delete=models.CASCADE)
     total_money = models.FloatField(default=0)
     enable_money = models.FloatField(default=0)
     def __str__(self):
-        return self.name
+        return self.user.username
     
 class Record(models.Model):
     '''交易记录：策略用户名，基金账户，状态，动作，代码，名字，数量，金额，成交金额，成交数量
@@ -62,6 +61,8 @@ class Record(models.Model):
     trademoney = models.FloatField()
     tradenumber = models.FloatField()
     
+    def __str__(self):
+        return self.user.user.username
     
     
 class Dailyinfo(models.Model):  
@@ -73,7 +74,7 @@ class Dailyinfo(models.Model):
     money = models.FloatField()
     
     def __str__(self):
-        return self.user
+        return self.user.user.username
     
     
     
