@@ -31,17 +31,17 @@ class Strategy_userSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('user', 'capitalaccount', 'total_money','enable_money')
 
 class RecordSerializer(serializers.HyperlinkedModelSerializer):
-    status = serializers.CharField(source="status.status")
+    status = serializers.CharField(source="status.status",read_only=True)
     action = serializers.CharField(source="action.name")
     user = serializers.CharField(source="user.user.username",read_only=True)
     class Meta:
         model = Record
-        fields = ('id','user','status','action','code','name','number','price','trademoney','tradenumber')
+        fields = ('id','user','status','action','code','name','number','price','trademoney','tradenumber','create_time')
         
     def create(self, validated_data):
         
         user=Strategy_user.objects.get(user__username=self.context["request"].user)
-        status=Status.objects.get(status=validated_data.get("status")["status"])
+        status=Status.objects.get(status="pending")
         action=Action.objects.get(name=validated_data.get("action")["name"])
         account=user.capitalaccount
         
@@ -49,6 +49,7 @@ class RecordSerializer(serializers.HyperlinkedModelSerializer):
         validated_data.update(status=status)
         validated_data.update(action=action)
         validated_data.update(account=account)
+        
         return Record.objects.create(**validated_data)
 
     def update(self, instance, validated_data):

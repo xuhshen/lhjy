@@ -53,9 +53,9 @@ class Record(models.Model):
     action = models.ForeignKey(Action, on_delete=models.CASCADE)
     
     code = models.CharField(max_length=200)
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200,blank=True)
     
-    marker_ticket = models.CharField(max_length=200,blank=True)
+    market_ticket = models.CharField(max_length=200,blank=True)
     
     number = models.FloatField()
     price = models.FloatField(blank=True)
@@ -63,6 +63,9 @@ class Record(models.Model):
     
     trademoney = models.FloatField(default=0)
     tradenumber = models.FloatField(default=0)
+    
+    create_time = models.DateTimeField(auto_now_add=True)
+    lastupdate_time = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return self.user.user.username

@@ -10,10 +10,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-
 from rest_framework import mixins
 from rest_framework import generics
-
+from datetime import date
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -30,8 +29,6 @@ class Strategy_userViewSet(viewsets.ModelViewSet):
     queryset = Strategy_user.objects.all()
     serializer_class = Strategy_userSerializer
     
-
-
 class RecordViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
@@ -39,7 +36,8 @@ class RecordViewSet(mixins.ListModelMixin,
     serializer_class = RecordSerializer
     
     def get_queryset(self):
-        queryset = Record.objects.filter(user__user=self.request.user,)
+        today = date.today()
+        queryset = Record.objects.filter(user__user=self.request.user,create_time__gte=today)
         return queryset
     
     def get(self, request, *args, **kwargs):
