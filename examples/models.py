@@ -55,11 +55,14 @@ class Record(models.Model):
     code = models.CharField(max_length=200)
     name = models.CharField(max_length=200)
     
-    number = models.FloatField()
-    money = models.FloatField()
+    marker_ticket = models.CharField(max_length=200,blank=True)
     
-    trademoney = models.FloatField()
-    tradenumber = models.FloatField()
+    number = models.FloatField()
+    price = models.FloatField(blank=True)
+    marker_price = models.BooleanField(default=False)
+    
+    trademoney = models.FloatField(default=0)
+    tradenumber = models.FloatField(default=0)
     
     def __str__(self):
         return self.user.user.username

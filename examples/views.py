@@ -16,8 +16,6 @@ from rest_framework import generics
 
 
 
-
-
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -38,26 +36,17 @@ class RecordViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
     
-#     queryset = Record.objects.all()
     serializer_class = RecordSerializer
     
+    def get_queryset(self):
+        queryset = Record.objects.filter(user__user=self.request.user,)
+        return queryset
+    
     def get(self, request, *args, **kwargs):
-        self.queryset = Record.objects.all()
-        print (request.user)
-#         self.queryset = Record.objects.all()
-# #         queryset = Record.objects.all()
-#         queryset = self.filter_queryset(self.get_queryset())
-# #         queryset = self.filter_queryset(queryset)
-# 
-#         page = self.paginate_queryset(queryset)
-#         if page is not None:
-#             serializer = self.get_serializer(page, many=True)
-#             return self.get_paginated_response(serializer.data)
-# 
-#         serializer = self.get_serializer(queryset, many=True)
-#         return Response(serializer.data)
-        return  self.list(request, *args, **kwargs)
-# 
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
 
