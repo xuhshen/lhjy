@@ -2,6 +2,7 @@ from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from .models import Strategy_user,Capitalaccount,Action,Status,Record
 from rest_framework.exceptions import ErrorDetail, ValidationError
+from .dealer import order2securities,cancel_order2securities
 
 
 class ActionSerializer(serializers.HyperlinkedModelSerializer):
@@ -31,18 +32,17 @@ class Strategy_userSerializer(serializers.HyperlinkedModelSerializer):
         model = Strategy_user
         fields = ('user', 'capitalaccount', 'total_money','enable_money')
 
-class RecordSerializer(serializers.HyperlinkedModelSerializer):
+class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
     status = serializers.CharField(source="status.status",read_only=True)
     action = serializers.CharField(source="action.name")
     user = serializers.CharField(source="user.user.username",read_only=True)
     account = serializers.CharField(source="account.account_name",read_only=True)
     class Meta:
         model = Record
-        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','create_time')
-        read_only_fields=("trademoney",'tradenumber','name')
+        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','market_ticket','create_time')
+        read_only_fields=("trademoney",'tradenumber','name','market_ticket',)
         
     def create(self, validated_data):
-        
         user=Strategy_user.objects.get(user__username=self.context["request"].user)
         status=Status.objects.get(status="pending")
         try:
@@ -51,10 +51,13 @@ class RecordSerializer(serializers.HyperlinkedModelSerializer):
             raise ValidationError({"action":"this field value incorrect!"})
         account=user.capitalaccount
         
+        market_ticket = order2securities([validated_data,account.account_name])
+        
         validated_data.update(user=user)
         validated_data.update(status=status)
         validated_data.update(action=action)
         validated_data.update(account=account)
+        validated_data.update(market_ticket=market_ticket)
         
         return Record.objects.create(**validated_data)
 
@@ -66,8 +69,8 @@ class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
     account = serializers.CharField(source="account.account_name",read_only=True)
     class Meta:
         model = Record
-        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','create_time')
-        read_only_fields=("trademoney",'tradenumber','name','code','number','price','market_price',)
+        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','market_ticket','create_time')
+        read_only_fields=("trademoney",'tradenumber','name','code','number','price','market_price','market_ticket',)
 
     def update(self, instance, validated_data):
         instance.status = Status.objects.get(status="cancel")

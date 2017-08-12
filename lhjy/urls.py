@@ -21,21 +21,16 @@ from examples import views
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
-
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'strategyuser', views.Strategy_userViewSet)
-# router.register(r'record', views.RecordViewSet)
-
-# urlpatterns = format_suffix_patterns(urlpatterns)
 
 urlpatterns = [
     url(r'^examples/', include('examples.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^', include(router.urls)),
-    url(r'^buy/$', views.RecordViewSet.as_view()),
-    url(r'^sell/$', views.RecordViewSet.as_view()),
-    url(r'^cancel/(?P<pk>[0-9]+)/$', views.RecordUpdateViewSet.as_view()),
+    url(r'^order/$', views.RecordOrderViewSet.as_view()),
+    url(r'^cancel/(?P<pk>[0-9]+)/$', views.RecordCancelViewSet.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 
