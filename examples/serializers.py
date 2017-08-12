@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
 from .models import Strategy_user,Capitalaccount,Action,Status,Record
+from rest_framework.exceptions import ErrorDetail, ValidationError
 
 
 class ActionSerializer(serializers.HyperlinkedModelSerializer):
@@ -34,15 +35,20 @@ class RecordSerializer(serializers.HyperlinkedModelSerializer):
     status = serializers.CharField(source="status.status",read_only=True)
     action = serializers.CharField(source="action.name")
     user = serializers.CharField(source="user.user.username",read_only=True)
+    account = serializers.CharField(source="account.account_name",read_only=True)
     class Meta:
         model = Record
-        fields = ('id','user','status','action','code','name','number','price','trademoney','tradenumber','create_time')
+        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','create_time')
+        read_only_fields=("trademoney",'tradenumber','name')
         
     def create(self, validated_data):
         
         user=Strategy_user.objects.get(user__username=self.context["request"].user)
         status=Status.objects.get(status="pending")
-        action=Action.objects.get(name=validated_data.get("action")["name"])
+        try:
+            action=Action.objects.get(name=validated_data.get("action")["name"])
+        except:
+            raise ValidationError({"action":"this field value incorrect!"})
         account=user.capitalaccount
         
         validated_data.update(user=user)
@@ -52,14 +58,28 @@ class RecordSerializer(serializers.HyperlinkedModelSerializer):
         
         return Record.objects.create(**validated_data)
 
+
+class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
+    status = serializers.CharField(source="status.status",read_only=True)
+    action = serializers.CharField(source="action.name",read_only=True)
+    user = serializers.CharField(source="user.user.username",read_only=True)
+    account = serializers.CharField(source="account.account_name",read_only=True)
+    class Meta:
+        model = Record
+        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','create_time')
+        read_only_fields=("trademoney",'tradenumber','name','code','number','price','market_price',)
+
     def update(self, instance, validated_data):
-        instance.status = validated_data.get('status', instance.email)
-        instance.name = validated_data.get('name', instance.name)
-        instance.price = validated_data.get('price', instance.price)
-        instance.trademoney = validated_data.get('trademoney', instance.trademoney)
-        instance.tradenumber = validated_data.get('tradenumber', instance.tradenumber)
+        instance.status = Status.objects.get(status="cancel")
         instance.save()
         return instance
-    
+
+
+
+
+
+
+
+
     
     

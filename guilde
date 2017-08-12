@@ -1,0 +1,12 @@
+pip install django -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
+pip install djangorestframework -i http://pypi.douban.com/simple --trusted-host pypi.douban.com
+
+
+python manage.py runserver 0:8000
+
+python manage.py startapp polls
+
+python manage.py migrate
+python manage.py makemigrations polls
+
+python manage.py createsuperuser

@@ -58,8 +58,8 @@ class Record(models.Model):
     market_ticket = models.CharField(max_length=200,blank=True)
     
     number = models.FloatField()
-    price = models.FloatField(blank=True)
-    marker_price = models.BooleanField(default=False)
+    price = models.FloatField(default=1000000)
+    market_price = models.BooleanField(default=False)
     
     trademoney = models.FloatField(default=0)
     tradenumber = models.FloatField(default=0)
