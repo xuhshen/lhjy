@@ -48,7 +48,9 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
     account = serializers.CharField(source="account.account_name",read_only=True)
     class Meta:
         model = Record
-        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','market_ticket','create_time')
+        fields = ('id','user','account','status','action','code','name','number','price',
+                  'trademoney','tradenumber','market_price','market_ticket','create_time',
+                  "lastupdate_time")
         read_only_fields=("trademoney",'tradenumber','name','market_ticket',)
         
     def create(self, validated_data):
@@ -134,7 +136,9 @@ class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
     account = serializers.CharField(source="account.account_name",read_only=True)
     class Meta:
         model = Record
-        fields = ('id','user','account','status','action','code','name','number','price','trademoney','tradenumber','market_price','market_ticket','create_time')
+        fields = ('id','user','account','status','action','code','name','number','price',
+                  'trademoney','tradenumber','market_price','market_ticket','create_time',
+                  'lastupdate_time')
         read_only_fields=("trademoney",'tradenumber','name','code','number','price','market_price','market_ticket',)
 
     def update(self, instance, validated_data):

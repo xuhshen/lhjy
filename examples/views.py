@@ -85,7 +85,6 @@ class RecordOrderViewSet(mixins.ListModelMixin,
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         
-#         self.update_account(serializer.data)      #冻结资金
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     
