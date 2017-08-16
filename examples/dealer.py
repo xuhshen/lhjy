@@ -20,11 +20,18 @@ def order2securities(data):
     data:{"act":"buy",data:<{}>} 
     '''
     ticket = send2server(data)
-    price = 100
+    market_price = data[0].get("market_price",False)
+    
+    if not market_price:
+        price = data[0].get("price",False)
+        if not price:
+            raise ValidationError({"error":1,"message":"price or market_price should be privide"})
+
     try:
         ticket = send2server(data)
     except:
         raise ValidationError({"error":1,"message":"ordering failed"})
+    
     return ticket,price
 
 def cancel_order2securities(data):
@@ -37,4 +44,13 @@ def cancel_order2securities(data):
     return rst
 
 
+def queryfromsecurities(data):
+    '''查询账户信息,返回字典，键值为委托单号，
+    
+    '''
+    values = {
+              "ticket1":{},
+              "ticket2":{}
+              }
+    return []
 

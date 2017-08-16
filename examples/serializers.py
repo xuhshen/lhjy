@@ -65,6 +65,7 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
         validated_data.update(action=action)
         validated_data.update(account=account)
         validated_data.update(market_ticket=market_ticket)
+        validated_data.update(price=price)
 
         return Record.objects.create(**validated_data)
     

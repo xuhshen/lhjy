@@ -4,7 +4,7 @@ from django.http import HttpResponse,Http404
 from django.contrib.auth.models import User
 from rest_framework import viewsets
 from .serializers import UserSerializer,Strategy_userSerializer,RecordOrderSerializer,RecordCancelSerializer
-from .models import Strategy_user,Record
+from .models import Strategy_user,Record,Status
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,7 +14,7 @@ from rest_framework import mixins
 from rest_framework import generics
 from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
-from .dealer import order2securities,cancel_order2securities
+from .dealer import order2securities,cancel_order2securities,queryfromsecurities
 from rest_framework import permissions
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -36,11 +36,6 @@ class Strategy_userViewSet(viewsets.ModelViewSet):
     queryset = Strategy_user.objects.all()
     serializer_class = Strategy_userSerializer
     
-#     def get(self, request, *args, **kwargs):
-#         queryset = self.filter_queryset(self.get_queryset())
-#         serializer = self.get_serializer(queryset, many=True)
-#         return Response(serializer.data)
-    
     
 class RecordOrderViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
@@ -58,6 +53,9 @@ class RecordOrderViewSet(mixins.ListModelMixin,
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
+        
+        self.sync_account(serializer.data)
+        
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
@@ -75,6 +73,17 @@ class RecordOrderViewSet(mixins.ListModelMixin,
             account.enable_money -= data["price"]*data["number"]
             account.save()
     
+    def sync_account(self,records):
+        rst = queryfromsecurities(None)
+        if not rst: return records 
+
+        for record in records:
+            ticket = rst[record.get("market_ticket")]
+            record.update(trademoney = ticket["trademoney"])
+            record.update(tradenumber = ticket["tradenumber"])
+            record.update(status = ticket["status"])
+        return  records   
+        
 
 class RecordCancelViewSet(mixins.UpdateModelMixin,
                   generics.GenericAPIView):
