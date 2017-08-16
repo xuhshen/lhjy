@@ -34,6 +34,20 @@ class Capitalaccount(models.Model):
     def __str__(self):
         return self.account_name
 
+class Stock(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE) 
+    code = models.CharField(max_length=200) 
+    name = models.CharField(max_length=200,default="") 
+    number = models.FloatField()
+    buy_price = models.FloatField()
+    market_value = models.FloatField()
+    
+    create_time = models.DateTimeField(auto_now_add=True)
+    lastupdate_time = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.code
+
 class Strategy_user(models.Model):
     '''策略账户：策略账户名，基金账户，总资金，可用资金
     '''
@@ -41,6 +55,15 @@ class Strategy_user(models.Model):
     capitalaccount = models.ForeignKey(Capitalaccount, on_delete=models.CASCADE)
     total_money = models.FloatField(default=0)
     enable_money = models.FloatField(default=0)
+    hold_position = models.ManyToManyField(
+        Stock,
+        through='Membership',
+    )
+    def get_stocks(self):
+        return Stock.objects.filter(user=self.user)
+#     
+#     
+    
     def __str__(self):
         return self.user.username
     
@@ -82,13 +105,9 @@ class Dailyinfo(models.Model):
     def __str__(self):
         return self.user.user.username
     
-    
-    
-    
-    
-    
-    
-    
+class Membership(models.Model):
+    strategy_user = models.ForeignKey(Strategy_user, on_delete=models.CASCADE)
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
 
         
         

@@ -20,14 +20,15 @@ def order2securities(data):
     data:{"act":"buy",data:<{}>} 
     '''
     ticket = send2server(data)
+    price = 100
     try:
         ticket = send2server(data)
     except:
         raise ValidationError({"error":1,"message":"ordering failed"})
-    return ticket
+    return ticket,price
 
 def cancel_order2securities(data):
-    '''撤销下单
+    '''撤销下单,如果正常取消，返回True，否则返回False，重复需要也返回False
     '''
     try:
         rst = send2server(data)

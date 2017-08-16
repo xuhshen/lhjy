@@ -25,6 +25,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
+    
 
 class Strategy_userViewSet(viewsets.ModelViewSet):
     """
@@ -34,6 +35,12 @@ class Strategy_userViewSet(viewsets.ModelViewSet):
     
     queryset = Strategy_user.objects.all()
     serializer_class = Strategy_userSerializer
+    
+#     def get(self, request, *args, **kwargs):
+#         queryset = self.filter_queryset(self.get_queryset())
+#         serializer = self.get_serializer(queryset, many=True)
+#         return Response(serializer.data)
+    
     
 class RecordOrderViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
@@ -59,13 +66,15 @@ class RecordOrderViewSet(mixins.ListModelMixin,
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         
-#         ticket = order2securities(serializer.data)
-#         Record.objects.filter(id=serializer.data.get("id")).update(market_ticket=ticket)
-#         serializer.data["market_ticket"] = 11111111111111111111
-#         print (serializer.data["market_ticket"])
-#         print (3333333333333333)
-        
+        self.update_account(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    
+    def update_account(self,data):
+        if data["action"] == "buy":
+            account =  Strategy_user.objects.get(user__username=data["user"])
+            account.enable_money -= data["price"]*data["number"]
+            account.save()
+    
 
 class RecordCancelViewSet(mixins.UpdateModelMixin,
                   generics.GenericAPIView):
@@ -85,13 +94,16 @@ class RecordCancelViewSet(mixins.UpdateModelMixin,
         self.perform_update(serializer)
 
         if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
-        cancel_order2securities(serializer.data)
+        back = cancel_order2securities(serializer.data)
+        if back:
+            self.update_account(serializer.data)
         
         return Response(serializer.data)
 
-
+    def update_account(self,data):
+        account =  Strategy_user.objects.get(user__username=data["user"])
+        account.enable_money += data["price"]*data["number"]-data["trademoney"]*data["tradenumber"]
+        account.save()
 
 

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Strategy_user,Capitalaccount,Action,Status,Record
+from .models import Strategy_user,Capitalaccount,Action,Status,Record,Stock
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from .dealer import order2securities,cancel_order2securities
 
@@ -25,12 +25,19 @@ class CapitalaccountSerializer(serializers.HyperlinkedModelSerializer):
         model = Capitalaccount
         fields = ('account_name', )
 
-class Strategy_userSerializer(serializers.HyperlinkedModelSerializer):
+class StockSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Stock
+        fields = "__all__"
+    
+class Strategy_userSerializer(serializers.ModelSerializer):
     capitalaccount = CapitalaccountSerializer()
     user = UserSerializer()
+    hold_position = StockSerializer(source='get_stocks', many=True)
+    
     class Meta:
         model = Strategy_user
-        fields = ('user', 'capitalaccount', 'total_money','enable_money')
+        fields = ('user', 'capitalaccount', 'total_money','enable_money','hold_position')
 
 class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
     status = serializers.CharField(source="status.status",read_only=True)
@@ -51,17 +58,16 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
             raise ValidationError({"action":"this field value incorrect!"})
         account=user.capitalaccount
         
-        market_ticket = order2securities([validated_data,account.account_name])
+        market_ticket,price = order2securities([validated_data,account.account_name])
         
         validated_data.update(user=user)
         validated_data.update(status=status)
         validated_data.update(action=action)
         validated_data.update(account=account)
         validated_data.update(market_ticket=market_ticket)
-        
+
         return Record.objects.create(**validated_data)
-
-
+    
 class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
     status = serializers.CharField(source="status.status",read_only=True)
     action = serializers.CharField(source="action.name",read_only=True)
