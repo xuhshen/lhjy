@@ -26,18 +26,31 @@ class UserViewSet(viewsets.ModelViewSet):
     
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer
-    
 
-class Strategy_userViewSet(viewsets.ModelViewSet):
+class All_Strategy_userViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
     permission_classes = (permissions.IsAdminUser,)
     
     queryset = Strategy_user.objects.all()
+    serializer_class = Strategy_userSerializer   
+
+class Strategy_userViewSet(mixins.ListModelMixin,
+                  generics.GenericAPIView):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    permission_classes = (permissions.IsAuthenticated,)
     serializer_class = Strategy_userSerializer
     
+    def get_queryset(self):
+        queryset = Strategy_user.objects.filter(user__username=self.request.user)
+        return queryset
     
+    def get(self, request, *args, **kwargs): 
+        return self.list(self, request, *args, **kwargs)
+        
 class RecordOrderViewSet(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   mixins.UpdateModelMixin,

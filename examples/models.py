@@ -61,9 +61,7 @@ class Strategy_user(models.Model):
         through='Membership',
     )
     def get_stocks(self):
-        return Stock.objects.filter(user=self.user)
-#     
-#     
+        return Stock.objects.filter(user=self.user,number__gt=0)
     
     def __str__(self):
         return self.user.username
