@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Strategy_user,Capitalaccount,Action,Status,Record,Stock
+from .models import Strategy_user,Capitalaccount,Action,Status,Record,Stock,Membership
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from .dealer import order2securities,cancel_order2securities
 from lhjy.settings import TESTING_ACCOUNT
@@ -62,7 +62,42 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
         account=user.capitalaccount 
         if str(self.context["request"].user) == TESTING_ACCOUNT:
             status = Status.objects.get(status="deal")
-            market_ticket = str(time.time())
+            market_ticket = str(time.time()) # 为测试账户生成一个随机数委托单
+            
+            stock_user = User.objects.get(username=self.context["request"].user)
+            
+            if validated_data.get("action")["name"] == "buy":
+                stock_object = Stock.objects.get_or_create(user=stock_user,code=validated_data.get("code"))
+                
+                stock = stock_object[0]
+                stock.cost_price = (stock.cost_price*stock.number + \
+                    validated_data.get("number")*validated_data.get("price"))/(validated_data.get("number")+stock.number)
+                stock.number += validated_data.get("number")
+                stock.market_price = validated_data.get("price")
+                stock.market_value = stock.number*stock.market_price
+                
+                if stock_object[1]:
+                    Membership.objects.create(strategy_user=user,stock=stock)
+            else:
+                try:
+                    stock = Stock.objects.get(user=stock_user,code=validated_data.get("code"))
+                except:
+                    raise ValidationError({"message":"you do not hold this stock"})
+                
+                stock.number -= validated_data.get("number")
+                if stock.number<0:
+                    raise ValidationError({"message":"you do not hold so many stock"})
+                elif stock.number==0:
+                    stock.cost_price = 0
+                else:
+                    stock.cost_price = (stock.cost_price*stock.number - \
+                        validated_data.get("number")*validated_data.get("price"))/(stock.number-validated_data.get("number"))
+                
+                stock.market_price = validated_data.get("price")
+                stock.market_value = stock.number*stock.market_price
+                
+            stock.save()                
+                
         else:
             status=Status.objects.get(status="pending")
             market_ticket,price = order2securities([validated_data,account.account_name])

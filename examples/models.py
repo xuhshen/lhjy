@@ -38,9 +38,10 @@ class Stock(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE) 
     code = models.CharField(max_length=200) 
     name = models.CharField(max_length=200,default="") 
-    number = models.FloatField()
-    buy_price = models.FloatField()
-    market_value = models.FloatField()
+    number = models.FloatField(default=0)
+    cost_price = models.FloatField(default=0)
+    market_price = models.FloatField(default=0)
+    market_value = models.FloatField(default=0)
     
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
