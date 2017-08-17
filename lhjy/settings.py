@@ -128,3 +128,10 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SOCKET_SERVER = "127.0.0.1"
+SOCKET_PORT = 9090
+
+TESTING_ACCOUNT = "TESTING"
+
+

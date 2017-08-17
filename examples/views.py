@@ -16,6 +16,7 @@ from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from .dealer import order2securities,cancel_order2securities,queryfromsecurities
 from rest_framework import permissions
+from lhjy.settings import TESTING_ACCOUNT
 
 class UserViewSet(viewsets.ModelViewSet):
     """
@@ -51,39 +52,56 @@ class RecordOrderViewSet(mixins.ListModelMixin,
         return queryset
     
     def get(self, request, *args, **kwargs):
+        '''获取当日委托单新，如果是测试账户，跳过同步
+                        同时和券商同步未完成委托单状态，但不保存
+        '''
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
-        
-        self.sync_account(serializer.data)
-        
-        return Response(serializer.data)
+
+        if request.user != TESTING_ACCOUNT:
+            n_data = self.sync_account(serializer.data)
+        else:
+            return Response(serializer.data)
+        return Response(n_data)
 
     def post(self, request, *args, **kwargs):
+        '''添加record记录，更新账户可用资金
+        '''
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         
-        self.update_account(serializer.data)
+        self.update_account(serializer.data)      #冻结资金
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
     def update_account(self,data):
+        ''' 下单买入的时候冻结资金，
+                            卖出资金解冻在成交之后更新，这里不做处理
+        '''
+        account =  Strategy_user.objects.get(user__username=data["user"])
+        
         if data["action"] == "buy":
-            account =  Strategy_user.objects.get(user__username=data["user"])
             account.enable_money -= data["price"]*data["number"]
             account.save()
+        elif data["action"] == "sell" and data["status"] == "deal":
+            account.enable_money += data["price"]*data["number"]
+            
+        account.save() 
     
     def sync_account(self,records):
+        '''同步未完成委托单信息
+        '''
         rst = queryfromsecurities(None)
         if not rst: return records 
 
         for record in records:
-            ticket = rst[record.get("market_ticket")]
-            record.update(trademoney = ticket["trademoney"])
-            record.update(tradenumber = ticket["tradenumber"])
-            record.update(status = ticket["status"])
+            if record.get("status") not in ["deal","cancel"]:
+                ticket = rst[record.get("market_ticket")]
+                record.update(trademoney = ticket["trademoney"])
+                record.update(tradenumber = ticket["tradenumber"])
+                record.update(status = ticket["status"])
         return  records   
-        
 
 class RecordCancelViewSet(mixins.UpdateModelMixin,
                   generics.GenericAPIView):
@@ -96,6 +114,8 @@ class RecordCancelViewSet(mixins.UpdateModelMixin,
         return queryset
     
     def post(self, request, *args, **kwargs):
+        '''更新 record 状态，更新账户资金，更新record 交易资金
+        '''
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -104,15 +124,8 @@ class RecordCancelViewSet(mixins.UpdateModelMixin,
 
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
-        back = cancel_order2securities(serializer.data)
-        if back:
-            self.update_account(serializer.data)
-        
         return Response(serializer.data)
 
-    def update_account(self,data):
-        account =  Strategy_user.objects.get(user__username=data["user"])
-        account.enable_money += data["price"]*data["number"]-data["trademoney"]*data["tradenumber"]
-        account.save()
+    
 
 
