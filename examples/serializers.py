@@ -175,6 +175,30 @@ class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
         account.save()
 
 
+class RecordQuerySerializer(serializers.HyperlinkedModelSerializer):
+    status = serializers.CharField(source="status.status")
+    action = serializers.CharField(source="action.name",read_only=True)
+    user = serializers.CharField(source="user.user.username",read_only=True)
+    account = serializers.CharField(source="account.account_name",read_only=True)
+    class Meta:
+        model = Record
+        fields = ('id','user','account','status','action','code','name','number','price',
+                  'trademoney','tradenumber','market_price','market_ticket','create_time',
+                  'lastupdate_time')
+        read_only_fields=('code','number','market_ticket','price',)
+
+    def update(self, instance, validated_data):
+        if validated_data.get("status"):
+            instance.status = Status.objects.get(status=validated_data.get("status")["status"])
+        instance.name = validated_data.get("name",instance.name)
+        instance.trademoney = validated_data.get("trademoney",instance.trademoney)
+        instance.tradenumber = validated_data.get("tradenumber",instance.tradenumber)
+        
+        instance.save()
+        return instance
+
+
+
 
 
     
