@@ -1,12 +1,5 @@
-import datetime
-
 from django.db import models
-from django.utils import timezone
-from django import forms
 from django.contrib.auth.models import User
-from lib2to3.fixer_util import Number
-from email.policy import default
-from django.db.models.fields.related import ManyToManyField
 
 class Action(models.Model):
     '''交易动作：买入，卖出

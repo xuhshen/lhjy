@@ -85,22 +85,9 @@ class RecordOrderViewSet(mixins.ListModelMixin,
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         
-        self.update_account(serializer.data)      #冻结资金
+#         self.update_account(serializer.data)      #冻结资金
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
-    def update_account(self,data):
-        ''' 下单买入的时候冻结资金，
-                            卖出资金解冻在成交之后更新，这里不做处理
-        '''
-        account =  Strategy_user.objects.get(user__username=data["user"])
-        
-        if data["action"] == "buy":
-            account.enable_money -= data["price"]*data["number"]
-            account.save()
-        elif data["action"] == "sell" and data["status"] == "deal":
-            account.enable_money += data["price"]*data["number"]
-            
-        account.save() 
     
     def sync_account(self,records):
         '''同步未完成委托单信息

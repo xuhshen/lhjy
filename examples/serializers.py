@@ -60,11 +60,31 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
         
         user=Strategy_user.objects.get(user__username=self.context["request"].user)
         account=user.capitalaccount 
+        stock_user = user.user
+        
+        #账户资金检查和股票余量检查
+        if validated_data.get("action")["name"] == "sell" :
+            try:
+                stock = Stock.objects.get(user=stock_user,code=validated_data.get("code"))
+            except:
+                raise ValidationError({"message":"you do not hold this stock"})
+            
+            new_number = stock.number-validated_data.get("number")
+            if new_number < 0:
+                raise ValidationError({"message":"you do not hold so many stock"})
+        
+        elif validated_data.get("action")["name"] == "buy":
+            user.enable_money -= validated_data.get("price")*validated_data.get("number")
+            account.enable_money -= validated_data.get("price")*validated_data.get("number")
+            if user.enable_money < 0:
+                raise ValidationError({"message":"you do not have so many money"})
+        
         if str(self.context["request"].user) == TESTING_ACCOUNT:
             status = Status.objects.get(status="deal")
             market_ticket = str(time.time()) # 为测试账户生成一个随机数委托单
             
-            stock_user = User.objects.get(username=self.context["request"].user)
+            validated_data.update(trademoney=validated_data.get("price"))
+            validated_data.update(tradenumber=validated_data.get("number"))
             
             if validated_data.get("action")["name"] == "buy":
                 stock_object = Stock.objects.get_or_create(user=stock_user,code=validated_data.get("code"))
@@ -79,22 +99,17 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
                 if stock_object[1]:
                     Membership.objects.create(strategy_user=user,stock=stock)
             else:
-                try:
-                    stock = Stock.objects.get(user=stock_user,code=validated_data.get("code"))
-                except:
-                    raise ValidationError({"message":"you do not hold this stock"})
-                
-                stock.number -= validated_data.get("number")
-                if stock.number<0:
-                    raise ValidationError({"message":"you do not hold so many stock"})
-                elif stock.number==0:
+                if new_number == 0:
                     stock.cost_price = 0
                 else:
                     stock.cost_price = (stock.cost_price*stock.number - \
-                        validated_data.get("number")*validated_data.get("price"))/(stock.number-validated_data.get("number"))
+                        validated_data.get("number")*validated_data.get("price"))/(new_number)
                 
+                stock.number = new_number
                 stock.market_price = validated_data.get("price")
                 stock.market_value = stock.number*stock.market_price
+                user.enable_money += validated_data.get("price")*validated_data.get("number")
+                account.enable_money += validated_data.get("price")*validated_data.get("number")
                 
             stock.save()                
                 
@@ -108,7 +123,8 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
         validated_data.update(action=action)
         validated_data.update(account=account)
         validated_data.update(market_ticket=market_ticket)
-
+        account.save()
+        user.save()
         return Record.objects.create(**validated_data)
     
 class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
