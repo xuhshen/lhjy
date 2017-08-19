@@ -93,6 +93,8 @@ class Dailyinfo(models.Model):
     account = models.ForeignKey(Capitalaccount, on_delete=models.CASCADE) 
     holdlist = models.TextField()
     money = models.FloatField()
+    marketvalue = models.FloatField(default=0)
+    create_time = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return self.user.user.username

@@ -3,8 +3,9 @@ from django.shortcuts import render
 from django.http import HttpResponse,Http404
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from .models import Strategy_user,Record,Status
-from .serializers import UserSerializer,Strategy_userSerializer,RecordOrderSerializer,RecordCancelSerializer,RecordQuerySerializer
+from .models import Strategy_user,Record,Status,Dailyinfo
+from .serializers import UserSerializer,Strategy_userSerializer,RecordOrderSerializer,\
+                        RecordCancelSerializer,RecordQuerySerializer,DailyLiquidationSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -148,10 +149,30 @@ class RecordQueryViewSet(mixins.UpdateModelMixin,
         self.perform_update(serializer)
 
         if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to
-            # forcibly invalidate the prefetch cache on the instance.
             instance._prefetched_objects_cache = {}
         
         return Response(serializer.data) 
+
+class DailyLiquidationViewSet(mixins.ListModelMixin,
+                              mixins.CreateModelMixin,
+                              generics.GenericAPIView):
+    
+    permission_classes = (permissions.IsAdminUser,)
+    serializer_class = DailyLiquidationSerializer
+
+    def get_queryset(self):
+        queryset = Dailyinfo.objects.filter(user__user=self.request.user)
+        return queryset
+    
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 

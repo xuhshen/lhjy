@@ -1,10 +1,10 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Strategy_user,Capitalaccount,Action,Status,Record,Stock,Membership
+from .models import Strategy_user,Capitalaccount,Action,Status,Record,Stock,Membership,Dailyinfo
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from .dealer import order2securities,cancel_order2securities
 from lhjy.settings import TESTING_ACCOUNT
-import time
+import time,json
 
 
 class ActionSerializer(serializers.HyperlinkedModelSerializer):
@@ -198,8 +198,30 @@ class RecordQuerySerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
+class DailyLiquidationSerializer(serializers.ModelSerializer):
+    user = serializers.CharField(source="user.user.username",read_only=True)
+    account = serializers.CharField(source="account.account_name",read_only=True)
+    
+    class Meta:
+        model = Dailyinfo
+        fields = "__all__"
+        read_only_fields=("holdlist",'money','marketvalue',)
 
-
-
+    def create(self, validated_data):
+        user = Strategy_user.objects.get(user__username=self.context["request"].user)
+        account = user.capitalaccount
+        stocks = user.get_stocks()
+        holdlist = json.dumps({stock.code:stock.number for stock in stocks })
+        money = user.enable_money  
+        marketvalue = money + sum([stock.market_value for stock in stocks])
+        
+        validated_data.update(user=user)
+        validated_data.update(account=account)
+        validated_data.update(holdlist=holdlist)
+        validated_data.update(money=money)
+        validated_data.update(marketvalue=marketvalue)
+        print (validated_data)
+        
+        return Dailyinfo.objects.create(**validated_data)
     
     

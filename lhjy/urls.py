@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^', include(router.urls)),
     url(r'^order/$', views.RecordOrderViewSet.as_view()),
     url(r'^strategyuser/$', views.Strategy_userViewSet.as_view()),
+    url(r'^dailyinfo/$', views.DailyLiquidationViewSet.as_view()),
     url(r'^cancel/(?P<pk>[0-9]+)/$', views.RecordCancelViewSet.as_view()),
     url(r'^query/(?P<pk>[0-9]+)/$', views.RecordQueryViewSet.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
