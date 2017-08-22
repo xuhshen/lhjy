@@ -10,3 +10,69 @@ python manage.py migrate
 python manage.py makemigrations polls
 
 python manage.py createsuperuser
+########################################################################
+接口说明：
+可以打开浏览器查看
+
+1.	GET /order/
+    	 获取当天所有委托单
+     
+  
+2.	POST /order/
+    	买入&卖出 
+		  postdata  {
+		    "action": "",
+		    "code": "",
+		    "number": null,
+		    "price": null,
+		    "market_price": false
+			}
+
+
+3.	GET /dailyinfo/
+     	 获取当前用户每天的账户结算信息
+
+4.	POST /dailyinfo/
+     	对账户进行结算，调用一次，生成一条结算记录
+     
+5.	POST /cancel/<pk>/
+     	 撤单操作，跟id号，如果单子已经完成，返回完成的单子信息，
+  
+     	 撤单同时，更新账户信息
+     	 
+6.	GET /query/<pk>/
+  		查询当前用户未完成委托单
+ 
+账户说明:
+   setting.py 配置了TESTING_ACCOUNT，当账户为这个是，直接跳过后台，按照下单价成交，同时更新账户信息
+   
+       其他账户，下单之后，会跟后台券商接口进行同步，默认状态为pending，委托单状态非结束状态，后台账户会持续和券商同步，定时查询状态
+   
+       用户调用查询接口是，会主动跟券商账户进行交易，返回同步信息，但不保存数据库，保存动作只在后台定时轮询时执行
+       
+       
+       
+   
+数据库说明：
+   1.策略账户（Strategy_user），包含可用资金，持仓情况，
+   2.资金账户（Capitalaccount），直接跟券商进行同步
+   3.委托单成交记录 （Record）
+   4.结算记录更新 （Dailyinfo）  
+   5.持仓个股（Stock），跟user关联，
+   
+   
+
+
+每个接口对应的操作：
+   GET /order/   ：  直接获取当前用户当日委托单
+   POST /order/  ： 分两类，1.测试账户，直接更新状态为成交， 同时更新资金账户，策略账户，持仓个股
+   						 2.正常账户，保存状态为pending，同时更新资金账户，策略账户，
+   POST /cancel/<pk>/：  撤单，检查委托单状态，更新委托单状态，更新资金账户，更新策略账户，更新持仓
+   
+   
+   
+   
+   
+   	
+	
+   

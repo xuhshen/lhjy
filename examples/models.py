@@ -32,6 +32,7 @@ class Stock(models.Model):
     code = models.CharField(max_length=200) 
     name = models.CharField(max_length=200,default="") 
     number = models.FloatField(default=0)
+    frozennumber = models.FloatField(default=0)
     cost_price = models.FloatField(default=0)
     market_price = models.FloatField(default=0)
     market_value = models.FloatField(default=0)
