@@ -75,8 +75,7 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
             if new_number < 0:
                 raise ValidationError({"message":"you do not hold so many stock"})
             stock.frozennumber += validated_data.get("number")
-        
-        elif validated_data.get("action")["name"] == "buy":
+        else:
             user.enable_money -= validated_data.get("price")*validated_data.get("number")
             account.enable_money -= validated_data.get("price")*validated_data.get("number")
             if user.enable_money < 0:
@@ -171,9 +170,19 @@ class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
         
         if instance.action.name == "buy":
             account.enable_money += instance.price*instance.number-data["trademoney"]*data["tradenumber"]
+            stock = Stock.objects.get_or_create(user=instance.user.user,code=instance.code)[0]
+            stock.cost_price = (stock.cost_price*stock.number + \
+                    data["tradenumber"]*data["trademoney"])/(data["tradenumber"]+stock.number)
+            stock.number += data["tradenumber"]
         elif instance.action.name == "sell":
+            stock = Stock.objects.get(user=instance.user.user,code=instance.code)
+            stock.cost_price = (stock.cost_price*stock.number - \
+                    data["tradenumber"]*data["trademoney"])/(stock.number-data["tradenumber"])
+            stock.frozennumber -= instance.number
+            stock.number -= data["tradenumber"]
             account.enable_money += data["trademoney"]*data["tradenumber"]
         account.save()
+        stock.save()
 
 
 class RecordQuerySerializer(serializers.HyperlinkedModelSerializer):
@@ -221,7 +230,6 @@ class DailyLiquidationSerializer(serializers.ModelSerializer):
         validated_data.update(holdlist=holdlist)
         validated_data.update(money=money)
         validated_data.update(marketvalue=marketvalue)
-        print (validated_data)
         
         return Dailyinfo.objects.create(**validated_data)
     
