@@ -49,9 +49,9 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Record
         fields = ('id','user','account','status','action','code','name','number','price',
-                  'trademoney','tradenumber','market_price','market_ticket','create_time',
+                  'tradeprice','tradenumber','market_price','market_ticket','create_time',
                   "lastupdate_time")
-        read_only_fields=("trademoney",'tradenumber','name','market_ticket',)
+        read_only_fields=("tradeprice",'tradenumber','name','market_ticket',)
         
     def create(self, validated_data):
         
@@ -85,7 +85,7 @@ class RecordOrderSerializer(serializers.HyperlinkedModelSerializer):
             status = Status.objects.get(status="deal")
             market_ticket = str(time.time()) # 为测试账户生成一个随机数委托单
             
-            validated_data.update(trademoney=validated_data.get("price"))
+            validated_data.update(tradeprice=validated_data.get("price"))
             validated_data.update(tradenumber=validated_data.get("number"))
             
             if validated_data.get("action")["name"] == "buy":
@@ -137,30 +137,18 @@ class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Record
         fields = ('id','user','account','status','action','code','name','number','price',
-                  'trademoney','tradenumber','market_price','market_ticket','create_time',
+                  'tradeprice','tradenumber','market_price','market_ticket','create_time',
                   'lastupdate_time')
-        read_only_fields=("trademoney",'tradenumber','name','code','number','price','market_price','market_ticket',)
+        read_only_fields=("tradeprice",'tradenumber','name','code','number','price','market_price','market_ticket',)
 
     def update(self, instance, validated_data):
-        '''更新 record 状态，更新账户资金，更新record 交易资金
+        '''不更新任何状态，只下发cancel 命令
         '''
         if instance.status.status in ["cancel","deal"]: 
             return instance
-        
-        #更新revord状态
-        instance.status = Status.objects.get(status="cancel")
-        
-        data = cancel_order2securities(instance.market_ticket)
-        
-        #更新账户资金，解冻资金
-        self.update_account(data,instance)  
-        
-        #更新record 成交部分数量和资金
-        instance.trademoney = data["trademoney"]
-        instance.tradenumber = data["tradenumber"]
-        
-        instance.save()
-        
+#         instance.status = Status.objects.get(status="cancel")
+        cancel_order2securities(instance.market_ticket) 
+#         instance.save()
         return instance
     
     def update_account(self,data,instance):
@@ -169,18 +157,18 @@ class RecordCancelSerializer(serializers.HyperlinkedModelSerializer):
         account =  Strategy_user.objects.get(user__username=instance.user.user.username)
         
         if instance.action.name == "buy":
-            account.enable_money += instance.price*instance.number-data["trademoney"]*data["tradenumber"]
+            account.enable_money += instance.price*instance.number-data["tradeprice"]*data["tradenumber"]
             stock = Stock.objects.get_or_create(user=instance.user.user,code=instance.code)[0]
             stock.cost_price = (stock.cost_price*stock.number + \
-                    data["tradenumber"]*data["trademoney"])/(data["tradenumber"]+stock.number)
+                    data["tradenumber"]*data["tradeprice"])/(data["tradenumber"]+stock.number)
             stock.number += data["tradenumber"]
         elif instance.action.name == "sell":
             stock = Stock.objects.get(user=instance.user.user,code=instance.code)
             stock.cost_price = (stock.cost_price*stock.number - \
-                    data["tradenumber"]*data["trademoney"])/(stock.number-data["tradenumber"])
+                    data["tradenumber"]*data["tradeprice"])/(stock.number-data["tradenumber"])
             stock.frozennumber -= instance.number
             stock.number -= data["tradenumber"]
-            account.enable_money += data["trademoney"]*data["tradenumber"]
+            account.enable_money += data["tradeprice"]*data["tradenumber"]
         account.save()
         stock.save()
 
@@ -193,18 +181,42 @@ class RecordQuerySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Record
         fields = ('id','user','account','status','action','code','name','number','price',
-                  'trademoney','tradenumber','market_price','market_ticket','create_time',
+                  'tradeprice','tradenumber','market_price','market_ticket','create_time',
                   'lastupdate_time')
         read_only_fields=('code','number','market_ticket','price',)
 
     def update(self, instance, validated_data):
         if validated_data.get("status"):
             instance.status = Status.objects.get(status=validated_data.get("status")["status"])
+        new_number = validated_data.get("tradenumber",instance.tradenumber) - instance.tradenumber
+        new_tradeprice = validated_data.get("tradeprice",instance.tradeprice)
+        acount = instance.user
+        stock_user = acount.user
+        stock = Stock.objects.get_or_create(user=stock_user,code=validated_data.get("code"))[0]
+        changemoney = validated_data.get("tradenumber",instance.tradenumber)*validated_data.get("tradeprice",instance.tradeprice)-\
+                instance.tradenumber*instance.tradeprice
+        
+        stock.market_price = new_tradeprice
+        if instance.action.name=="sell":
+            stock.cost_price = (stock.number*stock.cost_price - changemoney)/(stock.number-new_number)
+            stock.number -= new_number
+            stock.frozennumber -= new_number
+            stock.market_value = stock.number*stock.market_price
+            acount.enable_money += changemoney
+        else:
+            stock.name = validated_data.get("name")
+            stock.code = instance.code
+            stock.cost_price = (stock.number*stock.cost_price + changemoney)/(stock.number+new_number)
+            stock.number += new_number
+            stock.market_value = stock.number*stock.market_price
+
         instance.name = validated_data.get("name",instance.name)
-        instance.trademoney = validated_data.get("trademoney",instance.trademoney)
+        instance.tradeprice = validated_data.get("tradeprice",instance.tradeprice)
         instance.tradenumber = validated_data.get("tradenumber",instance.tradenumber)
         
+        stock.save()
         instance.save()
+        acount.save()
         return instance
 
 

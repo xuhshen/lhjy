@@ -40,18 +40,18 @@ def order2securities(data):
 #done
 def cancel_order2securities(data):
     '''撤销下单,如果正常取消，返回True，否则返回False，重复需要也返回False
-     rst:{"message":True,"trademoney":1，"tradenumber":1}
+     rst:{"message":True,"tradeprice":1，"tradenumber":1}
     '''
     message = {"action":"cancel","message":data} 
     
     try:
         rst = send2server(message)
-        trademoney = rst["trademoney"]
-        tradenumber = rst["trademoney"]
+        tradeprice = rst["tradeprice"]
+        tradenumber = rst["tradenumber"]
     except:
         raise ValidationError({"error":1,"message":"cancel failed"})
     
-    result = {"trademoney":trademoney,"tradenumber":tradenumber}
+    result = {"tradeprice":tradeprice,"tradenumber":tradenumber}
     
     return result
 
@@ -61,8 +61,8 @@ def queryfromsecurities(data):
     message = {"action":"query","message":data} 
     
     values = {
-              "ticket1":{"status":"","trademoney":0,"tradenumber":0},
-              "ticket2":{"status":"","trademoney":0,"tradenumber":0}
+              "ticket1":{"status":"","tradeprice":0,"tradenumber":0},
+              "ticket2":{"status":"","tradeprice":0,"tradenumber":0}
               }
     
     return []

@@ -66,17 +66,12 @@ class RecordOrderViewSet(mixins.ListModelMixin,
         return queryset
     
     def get(self, request, *args, **kwargs):
-        '''获取当日委托单新，如果是测试账户，跳过同步
-                        同时和券商同步未完成委托单状态，但不保存
+        '''
         '''
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
 
-        if request.user != TESTING_ACCOUNT:
-            n_data = self.sync_account(serializer.data)
-        else:
-            return Response(serializer.data)
-        return Response(n_data)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         '''添加record记录，更新账户可用资金
@@ -88,20 +83,6 @@ class RecordOrderViewSet(mixins.ListModelMixin,
         
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
     
-    
-    def sync_account(self,records):
-        '''同步未完成委托单信息
-        '''
-        rst = queryfromsecurities(None)
-        if not rst: return records 
-
-        for record in records:
-            if record.get("status") not in ["deal","cancel"]:
-                ticket = rst[record.get("market_ticket")]
-                record.update(trademoney = ticket["trademoney"])
-                record.update(tradenumber = ticket["tradenumber"])
-                record.update(status = ticket["status"])
-        return  records   
 
 class RecordCancelViewSet(mixins.UpdateModelMixin,
                   generics.GenericAPIView):
@@ -130,6 +111,8 @@ class RecordQueryViewSet(mixins.UpdateModelMixin,
                   generics.GenericAPIView):
     serializer_class = RecordQuerySerializer
     permission_classes = (permissions.IsAdminUser,)
+    '''供管理员账户定时更新后台数据，
+    '''
     
     def get_queryset(self):
         today = date.today()

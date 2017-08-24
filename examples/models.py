@@ -77,7 +77,7 @@ class Record(models.Model):
     price = models.FloatField(default=1000000)
     market_price = models.BooleanField(default=False)
     
-    trademoney = models.FloatField(default=0)
+    tradeprice = models.FloatField(default=0)
     tradenumber = models.FloatField(default=0)
     
     create_time = models.DateTimeField(auto_now_add=True)
