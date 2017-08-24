@@ -18,7 +18,7 @@ from django.contrib import admin
 
 from rest_framework import routers
 from examples import views
-
+from rest_framework.authtoken import views as vs
 from rest_framework.urlpatterns import format_suffix_patterns
 
 router = routers.DefaultRouter()
@@ -35,7 +35,11 @@ urlpatterns = [
     url(r'^dailyinfo/$', views.DailyLiquidationViewSet.as_view()),
     url(r'^cancel/(?P<pk>[0-9]+)/$', views.RecordCancelViewSet.as_view()),
     url(r'^query/(?P<pk>[0-9]+)/$', views.RecordQueryViewSet.as_view()),
-    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
+    url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^api-token-auth/', vs.obtain_auth_token)
 ]
+
+
+
 
 

@@ -3,7 +3,7 @@ import threading
 import time  
 import json
 from lhjy.settings import SOCKET_SERVER,SOCKET_PORT   
-from functools import wraps   
+import requests
 
 class fundaccount(object):
     
@@ -28,7 +28,6 @@ class fundaccount(object):
     
     def logout(self):
         pass
-    
     
     def cancel(self,data):
         self.conntect(data)
@@ -93,8 +92,6 @@ def parse_data(data):
     
     rst = json.dumps(message).encode()
     return rst
-
-
 
   
 if __name__ == "__main__":  
