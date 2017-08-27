@@ -26,6 +26,13 @@ class Status(models.Model):
     def __str__(self):
         return self.status
 
+class Company(models.Model):
+    '''资金账户对应的券商，期货公司
+    '''
+    name = models.CharField(max_length=200)
+    def __str__(self):
+        return self.name
+
 class Capitalaccount(models.Model):
     '''基金账户：账户名，账户密码，总资金，可用资金，市值
     '''
@@ -34,6 +41,7 @@ class Capitalaccount(models.Model):
     total_money = models.FloatField(default=0)
     enable_money = models.FloatField(default=0)
     market_value = models.FloatField(default=0)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE,default=1) 
     
     def __str__(self):
         return self.account_name

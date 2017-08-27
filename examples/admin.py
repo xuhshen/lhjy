@@ -9,3 +9,5 @@ admin.site.register(Action)
 admin.site.register(Status)
 admin.site.register(Membership)
 admin.site.register(Stock)
+admin.site.register(Company)
+
