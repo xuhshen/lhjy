@@ -4,11 +4,40 @@ import time
 import json
 from lhjy.settings import SOCKET_SERVER,SOCKET_PORT   
 import requests
+from multiprocessing import Process
+import os
+import sys
+import logging
 
-TOKEN = "Token 918bd2f5982d2abc9f9864b8c58d8af3d53967e6" 
+basedir = os.path.dirname(sys.argv[0])
+logfile = os.path.join(basedir,"sys.log")
+TOKEN = "Token 7729b1a47d79817903aba023af936090adecee38" 
 QUERY_URL = "http://127.0.0.1:8000/query/0/"
 UPDATE_BASE_URL = "http://127.0.0.1:8000/query/"
 
+logger = logging.getLogger('deamo')
+# logging.basicConfig(filename=logfile,level=logging.DEBUG,filemode='a',)
+logger.setLevel(logging.DEBUG)
+
+# create a handler, write to log.txt
+# logging.FileHandler(self, filename, mode='a', encoding=None, delay=0)
+# A handler class which writes formatted logging records to disk files.
+fh = logging.FileHandler(logfile)
+fh.setLevel(logging.DEBUG)
+
+# create another handler, for stdout in terminal
+# A handler class which writes logging records to a stream
+# sh = logging.StreamHandler()
+# sh.setLevel(logging.DEBUG)
+
+# set formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+# sh.setFormatter(formatter)
+# add handler to logger
+logger.addHandler(fh)
+# logger.debug('Debug')
+# logger.info('Info')
 
 class dashboard(object):
     def __init__(self,token=TOKEN,query_url=QUERY_URL,base_update_url=UPDATE_BASE_URL):
@@ -27,11 +56,7 @@ class dashboard(object):
         return result
     
     def format_account_data(self,query):
-        '''调整数据格式，{
-                                                                    账号：{
-                                                                                        委托单号：记录
-                                }
-                        }
+        '''调整数据格式，{账号：{委托单号：记录}}
         '''
         rst = {}
         for item in query:
@@ -43,12 +68,7 @@ class dashboard(object):
 
     def update_ticket(self,buildid,data):
         '''同步券商账户信息到本地数据库
-        data：{ 
-                "status": "",
-                "name": "",
-                "tradeprice": null,
-                "tradenumber": null,
-            }
+        data：{ "status": "","name": "","tradeprice": null,"tradenumber": null,}
         '''
         
         url = "{}/{}/".format(self.base_update_url,buildid)
@@ -120,7 +140,7 @@ class fundaccount(object):
                 
 #done
 def handle(sock, addr,dealer_connect):  
-    print('Accept new connection from %s:%s...' % addr) 
+    logger.info('Accept new connection from %s:%s...' % addr) 
     data = sock.recv(1024)
     rst = parse_data(json.loads(data.decode()),dealer_connect)   
     sock.send(rst)
@@ -134,7 +154,7 @@ def parse_data(data,dealer_connect):
     elif action == "order":
         ticket = str(time.time())
         message = {"ticket":ticket,"price":10}
-        print (dealer_connect)
+        logger.info (dealer_connect)
         
     elif action == "query":
         message = {}
@@ -163,18 +183,25 @@ class mydeamo(object):
         order_monitor = threading.Thread(target=self._monitor_order,args=(dealer_connect,))
         order_monitor.setDaemon(False)
         order_monitor.start()
+        return order_monitor
         
     def _monitor_order(self,dealer_connect):
         while True:
-            tickets = self.dashboard.query_pending_tickets()
-            formatdata = self.dashboard.format_account_data(tickets)
-            for account,tickets in formatdata.items():
-                if not dealer_connect.__contains__(account):
-                    dealer_connect[account] = fundaccount(username=account)
-                dealer_connect[account].query_order_ticket()
+            try:
+                tickets = self.dashboard.query_pending_tickets()
+                if not tickets:
+                    logger.info("no unfinished recored, exit thread!")
+                    break #如果没有未完成交易数据，进入休眠
+                formatdata = self.dashboard.format_account_data(tickets)
+                
+                for account,tickets in formatdata.items():
+                    if not dealer_connect.__contains__(account):
+                        dealer_connect[account] = fundaccount(username=account)
+                    dealer_connect[account].query_order_ticket()
+            except Exception as e :
+                logger.debug(e)
             
             time.sleep(self.sleeptime)
-
     
     def start_server(self):
         '''开启socket 服务，同时轮询dashboard
@@ -182,12 +209,13 @@ class mydeamo(object):
         dealer_connect = {} #保存各个券商的连接对象，避免重复连接，键值为资金账户
         
         self._start_socket() #启动socket监听
-        self._start_sync_server(dealer_connect) #启动券商和数据库同步服务
+        order_monitor = self._start_sync_server(dealer_connect) #启动券商和数据库同步服务
         
         #获取监听数据，执行对应的下单和撤单任务
         while True:
             sock, addr = self.socket.accept()
-              
+            if not order_monitor.isAlive(): #检查线程是否还存活
+                order_monitor = self._start_sync_server(dealer_connect)
             t = threading.Thread(target=handle, args=(sock,addr,dealer_connect))  
             t.start()
   
@@ -195,5 +223,11 @@ if __name__ == "__main__":
     
     deamo = mydeamo()
     deamo.start_server()
-    
+#     
+
+
+
+
+
+
         
