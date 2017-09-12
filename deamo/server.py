@@ -183,6 +183,7 @@ class mydeamo(object):
         order_monitor = threading.Thread(target=self._monitor_order,args=(dealer_connect,))
         order_monitor.setDaemon(False)
         order_monitor.start()
+        logger.info("start new thread for sync data")
         return order_monitor
         
     def _monitor_order(self,dealer_connect):
@@ -196,6 +197,7 @@ class mydeamo(object):
                 
                 for account,tickets in formatdata.items():
                     if not dealer_connect.__contains__(account):
+                        logger.info("dealer server not connected, try to create connect")
                         dealer_connect[account] = fundaccount(username=account)
                     dealer_connect[account].query_order_ticket()
             except Exception as e :
@@ -215,6 +217,7 @@ class mydeamo(object):
         while True:
             sock, addr = self.socket.accept()
             if not order_monitor.isAlive(): #检查线程是否还存活
+                logger.info("thread has been exited!start a new one for sync data")
                 order_monitor = self._start_sync_server(dealer_connect)
             t = threading.Thread(target=handle, args=(sock,addr,dealer_connect))  
             t.start()
