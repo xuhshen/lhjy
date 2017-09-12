@@ -1,0 +1,20 @@
+ ctypes type      C type                                       Python type
+# c_bool           _Bool                                        bool (1)
+# c_char           char                                         1-character string
+# c_wchar          wchar_t                                      1-character unicode string
+# c_byte           char                                         int/long
+# c_ubyte          unsigned char                                int/long
+# c_short          short                                        int/long
+# c_ushort         unsigned short                               int/long
+# c_int            int                                          int/long
+# c_uint           unsigned int                                 int/long
+# c_long           long                                         int/long
+# c_ulong          unsigned long                                int/long
+# c_longlong       __int64 or long long                         int/long
+# c_ulonglong      unsigned __int64 or unsigned long long       int/long
+# c_float          float                                        float
+# c_double         double                                       float
+# c_longdouble     long double                                  float
+# c_char_p         char * (NUL terminated)                      string or None
+# c_wchar_p        wchar_t * (NUL terminated)                   unicode or None
+# c_void_p         void *                                       int/long or None
