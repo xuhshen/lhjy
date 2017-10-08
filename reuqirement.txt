@@ -6,3 +6,4 @@ djangorestframework=3.6.3
 ps：centos 安装注意
 yum install gcc mariadb-devel
 pip3 install mysqlclient
+pip install django-filter

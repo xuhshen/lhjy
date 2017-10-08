@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'examples.apps.ExamplesConfig',
+    'app.apps.AppsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +79,16 @@ WSGI_APPLICATION = 'lhjy.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'lhjy',
+        'USER':'lhjy',
+        'PASSWORD':'lhjy',
+        'HOST':'101.132.74.48',
+        'PORT':'3306',
+        'OPTIONS':{
+             'init_command':"SET sql_mode='STRICT_TRANS_TABLES'",
+             'charset':'utf8'
+                   }
     }
 }
 
@@ -113,7 +122,8 @@ REST_FRAMEWORK = {
        'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
 }
 
 # Internationalization
