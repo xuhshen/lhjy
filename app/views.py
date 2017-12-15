@@ -9,14 +9,11 @@ from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-# 
 from rest_framework import mixins
 from rest_framework import generics
 from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
-# from .dealer import order2securities,cancel_order2securities,queryfromsecurities
 from rest_framework import permissions
-# from lhjy.settings import TESTING_ACCOUNT
 
 class StrategyUserViewSet(viewsets.ModelViewSet):
     """
