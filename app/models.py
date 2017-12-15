@@ -62,6 +62,8 @@ class HoldCategory(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
     
+    def __str__(self):
+        return self.code.name
     
     def get_marketvalue(self):
         market_value = self.hold_number * self.code.current_price
