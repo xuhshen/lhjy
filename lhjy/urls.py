@@ -23,21 +23,16 @@ from rest_framework.urlpatterns import format_suffix_patterns
 
 router = routers.DefaultRouter()
 router.register(r'strategyuser', views.StrategyUserViewSet)
-# router.register(r'account', views.CapitalAccountViewSet)
-# router.register(r'allusers', views.All_Strategy_userViewSet)
 
 urlpatterns = [
     url(r'^app/', include('app.urls')),
+    url(r'^dashboard/', include('dashboard.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^', include(router.urls)),
     url(r'^order/$', views.RecordOrderViewSet.as_view()),
     url(r'^account/$', views.CapitalAccountViewSet.as_view()),
-#     url(r'^strategyuser/$', views.StrategyUserViewSet.as_view()),
-#     url(r'^dailyinfo/$', views.DailyLiquidationViewSet.as_view()),
     url(r'^cancel/(?P<pk>[0-9]+)/$', views.RecordCancelViewSet.as_view()),
     url(r'^record/(?P<pk>[0-9]+)/$', views.RecordQueryViewSet.as_view()),
-#     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-#     url(r'^api-token-auth/', vs.obtain_auth_token)
 ]
 
 

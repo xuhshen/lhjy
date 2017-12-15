@@ -1,0 +1,7 @@
+.project
+.pydevproject
+.settings/
+*.pycsamples/.* 
+samples/* 
+*.pyc 
+*.log 
