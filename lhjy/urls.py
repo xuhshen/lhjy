@@ -26,9 +26,9 @@ router.register(r'strategyuser', views.StrategyUserViewSet)
 
 urlpatterns = [
     url(r'^app/', include('app.urls')),
-    url(r'^dashboard/', include('dashboard.urls')),
+    url(r'^', include('dashboard.urls')),
     url(r'^admin/', admin.site.urls),
-    url(r'^', include(router.urls)),
+#     url(r'^', include(router.urls)),
     url(r'^order/$', views.RecordOrderViewSet.as_view()),
     url(r'^account/$', views.CapitalAccountViewSet.as_view()),
     url(r'^cancel/(?P<pk>[0-9]+)/$', views.RecordCancelViewSet.as_view()),

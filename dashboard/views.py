@@ -17,3 +17,23 @@ from rest_framework import permissions
 
 def index(request):
     return render(request, 'index.html')
+ 
+def list(request):
+    return render(request, '商品列表.html')
+
+def list1(request):
+    return render(request, '订单列表.html')
+
+def list2(request):
+    return render(request, '会员列表.html')
+
+def list3(request):
+    return render(request, '库存管理.html')
+
+def list4(request):
+    return render(request, '商品分类.html')
+
+def list5(request):
+    return render(request, '信息通知.html')
+
+
