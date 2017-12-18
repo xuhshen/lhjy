@@ -18,11 +18,11 @@ from rest_framework import permissions
 def index(request):
     return render(request, 'index.html')
  
-def list(request):
-    return render(request, '商品列表.html')
+def product(request):
+    return render(request, 'product.html')
 
-def list1(request):
-    return render(request, '订单列表.html')
+def holdlist(request):
+    return render(request, 'holdlist.html')
 
 def list2(request):
     return render(request, '会员列表.html')

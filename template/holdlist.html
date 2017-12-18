@@ -1,0 +1,162 @@
+<!doctype html>
+<html class="no-js">
+<head>
+	{% include 'head.html' %}
+</head>
+
+<body>
+{% include 'framework.html' %}
+
+<div class=" admin-content">
+	
+		<div class="daohang">
+<!--  		<ul>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs"> 首页 </li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">帮助中心<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">奖金管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">产品管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+			</ul>-->	
+		</div>
+	
+	
+
+
+<div class="admin-biaogelist">
+	
+    <div class="listbiaoti am-cf">
+      <ul>详细持仓</ul>
+      
+      <dl class="am-icon-home" style="float: right;"> 当前位置： 首页 > <a href="/holdlist">持仓列表</a></dl>
+      
+    </div>
+	
+	<div class="am-btn-toolbars am-btn-toolbar am-kg am-cf">
+  <ul>
+    <li>
+      <div class="am-btn-group am-btn-group-xs">
+        <select data-am-selected="{btnWidth: 90, btnSize: 'sm', btnStyle: 'default'}">
+          <option value="b">基金一号</option>
+          <option value="o">基金二号</option>
+          <option value="o">基金三号</option>
+        </select>
+      </div>
+    </li>
+    <li>
+      <div class="am-btn-group am-btn-group-xs">
+	      <select data-am-selected="{btnWidth: 90, btnSize: 'sm', btnStyle: 'default'}">
+	        <option value="b">所有</option>
+	        <option value="o">股票</option>
+	        <option value="o">期货</option>
+	      </select>
+      </div>
+    </li>
+    <li><input type="text" class="am-form-field am-input-sm am-input-xm" placeholder="关键词搜索" /></li>
+    <li><button type="button" class="am-btn am-radius am-btn-xs " style="margin-top: -1px;">搜索</button></li>
+  </ul>
+</div>
+
+    <form class="am-form am-g">
+          <table width="100%" class="am-table am-table-bordered am-table-radius am-table-striped">
+            <thead>
+              <tr class="">
+                <th class="table-type">股票代码</th>
+                <th class="table-type">名字</th>
+                <th class="table-type">市值</th>
+                <th class="table-type">数量</th>
+                <th class="table-type">占比</th>
+                <th class="table-type">总盈亏</th>
+                <th class="table-type">当日盈亏</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                
+                <td>000001</td>
+                <td>平安银行</td>
+                <td><a href="#">25000</a></td>
+                <td>1000</td>
+                <td>2%</td>
+                <td>10%</td>
+                <td>0.05%</td>
+              </tr>
+              <tr>
+                
+                <td>601933</td>
+                <td>永辉超市</td>
+                <td><a href="#">30000</a></td>
+                <td>3000</td>
+                <td>2.5%</td>
+                <td>12%</td>
+                <td>5%</td>
+              </tr>
+            </tbody>
+          </table>
+          
+        <table width="100%" class="am-table am-table-bordered am-table-radius am-table-striped">
+            <thead>
+              <tr class="">
+                <th class="table-type">期货代码</th>
+                <th class="table-type">商品名字</th>
+                <th class="table-type">净持仓</th>
+                <th class="table-type">盈利</th>
+                <th class="table-type">占比</th>
+                <th class="table-type">保证金</th>
+                <th class="table-type">总市值</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                
+                <td>000001</td>
+                <td>铁矿石</td>
+                <td><a href="#">6</a></td>
+                <td>3%</td>
+                <td>2%</td>
+                <td>1000</td>
+                <td>10000</td>
+              </tr>
+              <tr>
+                
+                <td>601933</td>
+                <td>螺纹钢</td>
+                <td><a href="#">7</a></td>
+                <td>5%</td>
+                <td>2.5%</td>
+                <td>10000</td>
+                <td>100000</td>
+              </tr>
+            </tbody>
+          </table>
+        
+        
+        
+          
+       	 <ul class="am-pagination am-fr">
+              <li class="am-disabled"><a href="#">«</a></li>
+              <li class="am-active"><a href="#">1</a></li>
+              <li><a href="#">»</a></li>
+            </ul>
+     </form>
+ 
+ 
+ 
+ 
+ {% include 'foot.html' %}
+
+
+
+
+</div>
+
+</div>
+
+
+
+
+
+<script src="/static/js/amazeui.min.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html class="no-js">
+<head>
+	{% include 'head.html' %}
+</head>
+
+<body>
+{% include 'framework.html' %}
+
+<div class=" admin-content">
+	
+		<div class="daohang">
+<!--  		<ul>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs"> 首页 </li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">帮助中心<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">奖金管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">产品管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+			</ul>-->	
+		</div>
+	
+	
+
+
+<div class="admin-biaogelist">
+	
+    <div class="listbiaoti am-cf">
+      <ul >产品列表</ul>
+      
+      <dl class="am-icon-home" style="float: right;"> 当前位置： 首页 > <a href="#">产品列表</a></dl>
+      
+    </div>
+	
+	<div class="am-btn-toolbars am-btn-toolbar am-kg am-cf">
+  <ul>
+    <li>
+      <div class="am-btn-group am-btn-group-xs">
+        <select data-am-selected="{btnWidth: 90, btnSize: 'sm', btnStyle: 'default'}">
+          <option value="b">股票</option>
+          <option value="o">期货</option>
+          <option value="o">混合</option>
+        </select>
+      </div>
+    </li>
+    <li>
+      <div class="am-btn-group am-btn-group-xs">
+	      <select data-am-selected="{btnWidth: 90, btnSize: 'sm', btnStyle: 'default'}">
+	        <option value="b">开放</option>
+	        <option value="o">封闭</option>
+	        <option value="o">清盘</option>
+	      </select>
+      </div>
+    </li>
+    <li><input type="text" class="am-form-field am-input-sm am-input-xm" placeholder="关键词搜索" /></li>
+    <li><button type="button" class="am-btn am-radius am-btn-xs" style="margin-top: -1px;">搜索</button></li>
+  </ul>
+</div>
+
+    <form class="am-form am-g">
+          <table width="100%" class="am-table am-table-bordered am-table-radius am-table-striped">
+          
+            <thead>
+              <tr class="">
+                <th class="table-title">名字</th>
+                <th class="table-id">ID</th>
+                <th class="table-title">总资产</th>
+                <th class="table-type">净值</th>
+                <th class="table-type">总盈亏率</th>
+                <th class="table-type">股票盈亏</th>
+                <th class="table-type">期货盈亏</th>
+                <th class="table-type">总敞口比</th>
+                <th class="table-type">股票敞口比</th>
+                <th class="table-type">期货敞口比</th>
+                <th class="table-type">股票占比</th>
+                <th class="table-type">期货风险度</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>基金一号</td>
+                <td>1</td>
+                <td><a href="#">10000</a></td>
+                <td>1.01</td>
+                <td>10%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+              </tr>
+              <tr>
+                <td>基金二号</td>
+                <td>2</td>
+                <td><a href="#">10000</a></td>
+                <td>1.02</td>
+                <td>13%</td>
+                <td>6%</td>
+                <td>7%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+                <td>5%</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          
+       	 <ul class="am-pagination am-fr">
+              <li class="am-disabled"><a href="#">«</a></li>
+              <li class="am-active"><a href="#">1</a></li>
+              <li><a href="#">»</a></li>
+            </ul>
+     </form>
+ 
+ 
+ 
+ 
+ {% include 'foot.html' %}
+
+
+
+
+</div>
+
+</div>
+
+
+
+
+
+<script src="/static/js/amazeui.min.js"></script>
+
+
+
+</body>
+</html>

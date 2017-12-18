@@ -111,7 +111,7 @@ gallery.html css
 .admin-biaoge .am-table>thead>tr>th{text-align: center}
 .admin-biaoge .am-table{background-color: #FFF;padding: 3px;border-radius: 3px;text-align: center}
 .admin-biaogelist{background-color: #f1f2f7;position:fixed;right:0;bottom:0;top:85px;left:210px; overflow-y:auto; overflow-x: hidden; }
-
+.admin-biaoge .product{font-size: 16px;line-height: 35px;border-bottom: solid 1px #c9cdd7;margin-bottom: 10px}
 
 
 
