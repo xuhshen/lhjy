@@ -89,8 +89,8 @@ class CapitalAccount(models.Model):
     total_money = models.FloatField(default=0,help_text="账户总资金")
     allocation_money = models.FloatField(default=0,help_text="可分配资金") #可分配资金
     enable_money = models.FloatField(default=0,help_text="可用资金") #可用资金
-    ssag = models.CharField(max_length=200,help_text="上证股东代码") #上证股东代码
-    szag = models.CharField(max_length=200,help_text="深证股东代码") #深证股东代码
+    ssag = models.CharField(max_length=200,blank=True,help_text="上证股东代码") #上证股东代码
+    szag = models.CharField(max_length=200,blank=True,help_text="深证股东代码") #深证股东代码
     
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
