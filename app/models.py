@@ -71,9 +71,9 @@ class HoldCategory(models.Model):
         return market_value
 
 class AccountType(models.Model):
-    value = models.CharField(max_length=100,help_text="资金账户类型定义")
+    name = models.CharField(max_length=100,help_text="资金账户类型定义")
     def __str__(self):
-        return self.value
+        return self.name
 
     
 class CapitalAccount(models.Model):
@@ -86,6 +86,7 @@ class CapitalAccount(models.Model):
     account_name = models.CharField(max_length=200,help_text="资金账号")
     account_pass = models.CharField(max_length=200,help_text="资金账号密码")
     
+    initial_money = models.FloatField(default=0,help_text="账户初始资金")
     total_money = models.FloatField(default=0,help_text="账户总资金")
     allocation_money = models.FloatField(default=0,help_text="可分配资金") #可分配资金
     enable_money = models.FloatField(default=0,help_text="可用资金") #可用资金
@@ -94,7 +95,7 @@ class CapitalAccount(models.Model):
     
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
-    
+    today_profit = models.FloatField(default=0,help_text="当天收益") 
     
     def __str__(self):
         return self.product

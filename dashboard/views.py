@@ -26,8 +26,22 @@ class index(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
-        print (serializer.data)
-        return render(request, 'index.html',{"data":serializer.data})
+        account = AccountType.objects.all()
+        data = {str(i.id):[i.name,0] for i in account}
+        data["product"] = {}
+        data["totalprofit"] = 0
+        data["dayprofit"] = 0
+        
+        for i in serializer.data:
+            if data["product"].__contains__(i["product"]):
+                data["product"][i["product"]][i["account_name"]] = i
+            else:
+                data["product"][i["product"]] = {i["account_name"]:i}
+            data[str(i["type"])][1] += 1
+            data["dayprofit"] += i["today_profit"]
+            data["totalprofit"] += i["total_money"]/(i["initial_money"]+0.0000001)-1
+        print (data)
+        return render(request, 'index.html',{"data":data})
 
  
 def product(request):

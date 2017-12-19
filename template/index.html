@@ -23,22 +23,22 @@
    <div class="admin-index">
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 100}">
         <dt class="qs"><i class="am-icon-user"></i></dt>
-        <dd>5</dd>
-        <dd class="f12">股票账户</dd>
+        <dd>{{data.1.1}}</dd>
+        <dd class="f12">{{data.1.0}}</dd>
       </dl>
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 300}">
         <dt class="cs"><i class="am-icon-user"></i></dt>
-        <dd>2</dd>
-        <dd class="f12">期货账户</dd>
+        <dd>{{data.3.1}}</dd>
+        <dd class="f12">{{data.3.0}}</dd>
       </dl>
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 600}">
         <dt class="hs"><i class="am-icon-line-chart"></i></dt>
-        <dd>20%</dd>
+        <dd>{{data.dayprofit}}%</dd>
         <dd class="f12">今日收益</dd>
       </dl>
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 900}">
         <dt class="ls"><i class="am-icon-line-chart"></i></dt>
-        <dd>100%</dd>
+        <dd>{{data.totalprofit}}%</dd>
         <dd class="f12">累计收益</dd>
       </dl>
     </div>
