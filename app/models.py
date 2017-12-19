@@ -74,6 +74,7 @@ class AccountType(models.Model):
     value = models.CharField(max_length=100,help_text="资金账户类型定义")
     def __str__(self):
         return self.value
+
     
 class CapitalAccount(models.Model):
     '''基金账户：账户名，账户密码，总资金，可用资金，市值
@@ -81,6 +82,7 @@ class CapitalAccount(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE,default=1,help_text="证券公司或者期货公司") 
     type = models.ForeignKey(AccountType, on_delete=models.CASCADE,default=1,help_text="账户类型，股票账户，期货账户，回测账户")
     
+    product = models.CharField(max_length=200,help_text="产品名字")
     account_name = models.CharField(max_length=200,help_text="资金账号")
     account_pass = models.CharField(max_length=200,help_text="资金账号密码")
     
@@ -108,7 +110,8 @@ class CapitalAccount(models.Model):
         for strategy_user in StrategyUser.objects.filter(capitalaccount=self):
             market_value += strategy_user.get_total_market_value()
         return market_value
-    
+
+
 class StrategyUser(models.Model):
     '''策略账户：策略账户名，基金账户，总资金，可用资金
     '''
