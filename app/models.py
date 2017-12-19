@@ -97,7 +97,7 @@ class CapitalAccount(models.Model):
     
     
     def __str__(self):
-        return self.account_name
+        return self.product
     
     def get_holdlist(self):
         holdlist = []

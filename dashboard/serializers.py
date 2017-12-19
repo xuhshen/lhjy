@@ -4,4 +4,8 @@ from app.models import *
 from rest_framework.exceptions import ErrorDetail, ValidationError
 
 class IndexSerializer(serializers.ModelSerializer):
-    pass 
+#     holdlist = HoldCategory()
+    
+    class Meta:
+        model = CapitalAccount
+        fields = "__all__" 

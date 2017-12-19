@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from app.models import *
 from app.serializers import *
+from .serializers import IndexSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,27 +14,26 @@ from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework import permissions
 
+class index(generics.GenericAPIView):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+#     permission_classes = (permissions.IsAdminUser,)
+     
+    queryset = CapitalAccount.objects.all()
+    serializer_class = IndexSerializer
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        print (serializer.data)
+        return render(request, 'index.html',{"data":serializer.data})
 
-
-def index(request):
-    return render(request, 'index.html')
  
 def product(request):
     return render(request, 'product.html')
 
 def holdlist(request):
     return render(request, 'holdlist.html')
-
-def list2(request):
-    return render(request, '会员列表.html')
-
-def list3(request):
-    return render(request, '库存管理.html')
-
-def list4(request):
-    return render(request, '商品分类.html')
-
-def list5(request):
-    return render(request, '信息通知.html')
 
 
