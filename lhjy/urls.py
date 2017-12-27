@@ -21,18 +21,11 @@ from app import views
 from rest_framework.authtoken import views as vs
 from rest_framework.urlpatterns import format_suffix_patterns
 
-router = routers.DefaultRouter()
-router.register(r'strategyuser', views.StrategyUserViewSet)
 
 urlpatterns = [
-    url(r'^app/', include('app.urls')),
+    url(r'^api/', include('app.urls')),
     url(r'^', include('dashboard.urls')),
     url(r'^admin/', admin.site.urls),
-#     url(r'^', include(router.urls)),
-    url(r'^order/$', views.RecordOrderViewSet.as_view()),
-    url(r'^account/$', views.CapitalAccountViewSet.as_view()),
-    url(r'^cancel/(?P<pk>[0-9]+)/$', views.RecordCancelViewSet.as_view()),
-    url(r'^record/(?P<pk>[0-9]+)/$', views.RecordQueryViewSet.as_view()),
 ]
 
 

@@ -23,22 +23,22 @@
    <div class="admin-index">
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 100}">
         <dt class="qs"><i class="am-icon-user"></i></dt>
-        <dd>{{data.1.1}}</dd>
-        <dd class="f12">{{data.1.0}}</dd>
+        <dd>{{data.stock.account_num}}</dd>
+        <dd class="f12">股票账户</dd>
       </dl>
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 300}">
         <dt class="cs"><i class="am-icon-user"></i></dt>
-        <dd>{{data.3.1}}</dd>
-        <dd class="f12">{{data.3.0}}</dd>
+        <dd>{{data.future.account_num}}</dd>
+        <dd class="f12">期货账户</dd>
       </dl>
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 600}">
         <dt class="hs"><i class="am-icon-line-chart"></i></dt>
-        <dd>{{data.dayprofit}}%</dd>
+        <dd>{{data.total.day_profit}}%</dd>
         <dd class="f12">今日收益</dd>
       </dl>
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 900}">
         <dt class="ls"><i class="am-icon-line-chart"></i></dt>
-        <dd>{{data.totalprofit}}%</dd>
+        <dd>{{data.total.total_profit}}% </dd>
         <dd class="f12">累计收益</dd>
       </dl>
     </div>
@@ -57,42 +57,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>基金一号</td>
-            <td>2017-11-11</td>
-            <td><a href="#">20</a></td>
-            <td>70%</td>
-            <td>0.5%</td>
-            <td>15% </td>
-            <td>股票 </td>
-          </tr>
-          <tr>
-            <td>基金二号</td>
-            <td>2017-11-11</td>
-            <td><a href="#">10</a></td>
-            <td>50%</td>
-            <td>0.2%</td>
-            <td>10% </td>
-            <td>期货 </td>
-          </tr>
-           <tr>
-            <td>基金三号</td>
-            <td>2017-11-11</td>
-            <td><a href="#">10</a></td>
-            <td>10%</td>
-            <td>0.3%</td>
-            <td>12% </td>
-            <td>债券 </td>
-          </tr>
-           <tr>
-            <td>基金四号</td>
-            <td>2017-11-11</td>
-            <td><a href="#">10</a></td>
-            <td>20%</td>
-            <td>0.2%</td>
-            <td>10% </td>
-            <td>期货 </td>
-          </tr>
+       	{% for product in data.products %}
+	         <tr>
+	            <td>{{product.name}}</td>
+	            <td>{{product.stime}}</td>
+	            <td><a href="#">{{product.holdbum}}</a></td>
+	            <td>{{product.holdrate}}</td>
+	            <td>{{product.day_profit}}</td>
+	            <td>{{product.history_profit}} </td>
+	            <td>{{product.type}} </td>
+	          </tr>
+        {% endfor %}
         </tbody>
       </table>
      
@@ -101,25 +76,25 @@
     <div class="shuju">
       <div class="shujuone">
         <dl>
-          <dt>股票资产：  100000000</dt>
-          <dt>今年利润：  20000000</dt>
-          <dt>今年收益：  20%</dt>
-          <dt>当月收益：  5%</dt>
+          <dt>股票资产：  {{data.stock.value}}</dt>
+          <dt>今年利润：  {{data.stock.year_profit}}</dt>
+          <dt>今年收益： {{data.stock.year_profit}}</dt>
+          <dt>当月收益：  {{data.stock.mon_profit}}</dt>
         </dl>
         <ul>
-          <h2>26.83%</h2>
+          <h2> {{data.stock.total_profit}}</h2>
           <li>累计收益</li>
         </ul>
       </div>
       <div class="shujutow">
         <dl>
-          <dt>期货资产：  1356666</dt>
-          <dt>今年利润：   5646465.98</dt>
-          <dt>今年收益：  546464</dt>
-          <dt>当月收益：  4%</dt>
+          <dt>期货资产：  {{data.future.value}}</dt>
+          <dt>今年利润：   {{data.future.year_profit}}</dt>
+          <dt>今年收益：  {{data.future.year_profit}}</dt>
+          <dt>当月收益：  {{data.future.mon_profit}}</dt>
         </dl>
         <ul>
-          <h2>72.83%</h2>
+          <h2>{{data.future.total_profit}}</h2>
           <li>累计收益</li>
         </ul>
       </div>

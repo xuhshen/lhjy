@@ -1,0 +1,38 @@
+下单接口：
+	买/卖
+	账户token
+	
+	name:策略账号
+	code:品种（代码）
+	number:数量
+	price:价格    （0则市价）
+	action:交易方向 (0:买入/买开，1:卖出/卖平，2:卖开，3:买平)
+	
+	返回：
+	   订单号/None
+
+撤单接口：
+    name:策略账号
+    id:订单号
+    
+       返回：
+       True/False
+       
+查询历史成交订单：
+    name:  策略账号
+    stime：起始时间
+    etime：结束时间
+    
+    
+       返回：
+       None/{action:[[code,number,price],...],...}
+       
+ 查询持仓情况以及资金：
+     name:策略账号
+     
+        返回:
+        {"holdlist":[[code,number,price],...]/[],"enablemoney":0,"totalmoney":0}
+     
+     
+     
+     

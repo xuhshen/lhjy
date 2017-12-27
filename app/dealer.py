@@ -15,7 +15,7 @@ def send2server(data):
     s.close()
     return json.loads(result)
 
-def order2securities(data):
+def order(data):
     '''下单到券商,返回委托单号，委托价，如果是市价委托，委托价为当前市价
               下单失败则直接返回异常
     '''
@@ -25,12 +25,8 @@ def order2securities(data):
                "action":data.get("trade_action").name,
                "number":data.get("pretrade_number"),
                "price":data.get("price"),
-               "is_market_price":data.get("is_market_price"),
             }
 
-    if message["action"] not in ["买入","卖出"]:
-        raise ValidationError({"error":1,"message":"买卖动作错误，请检查数据库配置"})
-  
     if data.get("strategy_account").capitalaccount.type.value == "回测账户":
         import uuid
         ticket = uuid.uuid1()
@@ -45,7 +41,7 @@ def order2securities(data):
     
     return ticket,price
 
-def cancel_order2securities(data):
+def cancel(data):
     '''撤销下单,如果正常取消，返回True，否则返回False，重复需要也返回False
      rst:{"message":True,"tradeprice":1，"tradenumber":1}
     '''
@@ -61,6 +57,8 @@ def cancel_order2securities(data):
     result = {"tradeprice":tradeprice,"tradenumber":tradenumber}
     
     return result
+
+
 
 # def queryfromsecurities(data):
 #     '''查询账户信息,返回字典，键值为委托单号，
