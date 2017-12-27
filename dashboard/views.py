@@ -89,7 +89,6 @@ class index(generics.GenericAPIView):
                      "type":"期货"},
                   ]
               }    
-        print (data)
         return render(request, 'index.html',{"data":data})
 
     def updateproduct(self,data,newdata):
