@@ -25,72 +25,51 @@ class index(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         serializer = self.get_serializer(queryset, many=True)
-#         account = AccountType.objects.all()
-#         data = {str(i.id):[i.name,0] for i in account}
-#         data["product"] = {}
-#         data["totalprofit"] = 0
-#         data["dayprofit"] = 0
-#         
-#         for i in serializer.data:
-#             if data["product"].__contains__(i["product"]):
-#                 self.updateproduct(data["product"][i["product"]][i["account_name"]],i)
-#             else:
-#                 data["product"][i["product"]] = {i["account_name"]:i}
-#                 
-#             data[str(i["type"])][1] += 1
-#             data["dayprofit"] += round(i["today_profit"],2)
-#             data["totalprofit"] += round(i["total_money"]/(i["initial_money"]+0.0000001)-1,2)
-        data={
-               "total":{"account_num":2,
-                        "value":2000000,
-                        "year_profit":0,
-                        "day_profit":0,
-                        "mon_profit":0,
-                        "total_profit":0
-                        },
-               "stock":{"account_num":2,
-                        "value":1000000,
-                        "year_profit_money":100000,
-                        "year_profit":"10%",
-                        "day_profit":"10%",
-                        "mon_profit":"10%",
-                        "total_profit":"10%"},
-               "future":{"account_num":2,
-                         "value":1000000,
-                         "year_profit_money":100000,
-                         "year_profit":"10%",
-                        "day_profit":"10%",
-                        "mon_profit":"10%",
-                        "total_profit":"10%"},
-              "products":[
-                    {
-                     "name":"基金一号",
-                     "stime":"2017-11-11",
-                     "holdbum":"10",
-                     "holdrate":"10%",
-                     "day_profit":"0.1%",
-                     "history_profit":"10%",
-                     "type":"股票"},
-                          {
-                     "name":"基金二号",
-                     "stime":"2017-11-11",
-                     "holdbum":"10",
-                     "holdrate":"10%",
-                     "day_profit":"0.1%",
-                     "history_profit":"10%",
-                     "type":"股票"},
-                          {
-                     "name":"基金san号",
-                     "stime":"2017-11-11",
-                     "holdbum":"10",
-                     "holdrate":"10%",
-                     "day_profit":"0.1%",
-                     "history_profit":"10%",
-                     "type":"期货"},
-                  ]
-              }    
+        fileds = ["account_num","value","year_profit","day_profit","mon_profit",
+                  "total_profit","year_profit_money","mon_profit_money","total_profit_money"]
+        
+        data = {"total":{k:0 for k in fileds},
+                "stock":{k:0 for k in fileds},
+                "future":{k:0 for k in fileds},
+                "products":[]}
+        
+        for a in serializer.data:
+            data["total"]["account_num"] += 1
+            data["total"]["value"] += a["accountinfo"].total_assets
+            data["total"]["year_profit_money"] += a["accountinfo"].total_assets-a["yearinfo"].total_assets
+            data["total"]["mon_profit_money"] += a["accountinfo"].total_assets-a["moninfo"].total_assets
+            data["total"]["total_profit_money"] += a["accountinfo"].total_assets-a["initial_capital"]
+            
+            if a["type"] == "股票":
+                data["stock"]["account_num"] += 1
+                data["stock"]["value"] += a["accountinfo"].total_assets
+                data["stock"]["year_profit_money"] += a["accountinfo"].total_assets-a["yearinfo"].total_assets
+                data["stock"]["mon_profit_money"] += a["accountinfo"].total_assets-a["moninfo"].total_assets
+                data["stock"]["total_profit_money"] += a["accountinfo"].total_assets-a["initial_capital"]
+            else:
+                pass
+            
+            a["holdrate"] = "{}%".format(self.divid(a["accountinfo"].market_value,a["accountinfo"].total_assets)*100)
+            a["history_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["initial_capital"])*100-100)
+            
+            a["day_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["lastinfo"].total_assets)*100-100)
+            
+            data["products"].append(a)
+            
+            data["total"]["year_profit"] = self.divid(data["total"]["year_profit_money"],data["total"]["value"])
+            data["total"]["mon_profit"] = self.divid(data["total"]["mon_profit_money"],data["total"]["value"])
+            data["total"]["total_profit"] = self.divid(data["total"]["total_profit_money"],data["total"]["value"])
+            
+            data["stock"]["year_profit"] = self.divid(data["stock"]["year_profit_money"],data["total"]["value"])
+            data["stock"]["mon_profit"] = self.divid(data["stock"]["mon_profit_money"],data["total"]["value"])
+            data["stock"]["total_profit"] = self.divid(data["stock"]["total_profit_money"],data["total"]["value"])
+            
         return render(request, 'index.html',{"data":data})
 
+    def divid(self,a,b):
+        b += 0.000001
+        return a/b
+            
     def updateproduct(self,data,newdata):
         if data["date"] < newdata["create_time"]:
             data["date"]=newdata["create_time"]

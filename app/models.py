@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.conf import settings
+import datetime
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
@@ -28,14 +29,55 @@ class Company(models.Model):
 class Account(models.Model):
     name = models.CharField(max_length=100,help_text="账户名")
     account = models.CharField(max_length=50,help_text="账户号")
-    type = models.CharField(max_length=50,help_text="账户类型")
+    type = models.CharField(max_length=50,default="股票",help_text="账户类型")
     company = models.ForeignKey(Company, on_delete=models.CASCADE,help_text="券商") 
+    initial_capital = models.FloatField(default=0,help_text="初始资金")
+    create_time = models.DateTimeField(auto_now_add=True)
+    lastupdate_time = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return "{}({})".format(self.account,self.name)
     
     def getholdlist(self):
-        StockHoldList.objects.get(account=self)
+#         holdlist = []
+        rst = StockHoldList.objects.filter(account=self,number__gt=0)
+        return rst
+    
+    def getholdnum(self):
+        return len(self.getholdlist())
+    
+    def getlatestinfo(self):
+        if self.type == "股票":
+            rst = StockLatestRecord.objects.get(account=self)
+        else:
+            rst = FuturesLatestRecord.objects.get(account=self)
+        return rst
+    
+    def getyearstartinfo(self):
+        y = datetime.datetime.now().year-1
+        y_date = datetime.datetime.strptime("{}-12-28".format(y),'%Y-%m-%d')
+        if self.type == "股票":
+            rst = StockHistory.objects.filter(account=self,create_time__gt=y_date).order_by("create_time")[0]
+        else:
+            rst = StockHistory.objects.get(account=self)
+        return rst
+    
+    def getmonstartinfo(self):
+        m_date = datetime.datetime.now()-datetime.timedelta(days=30)
+        if self.type == "股票":
+            rst = StockHistory.objects.filter(account=self,create_time__gt=m_date).order_by("create_time")[0]
+        else:
+            rst = StockHistory.objects.get(account=self)
+        return rst
+    
+    def getlastinfo(self):
+        rst = StockHistory.objects.filter(account=self).order_by("create_time")[0]
+        return rst
+#     def get_holdlist(self):
+#         holdlist = []
+#         for strategy_user in StrategyUser.objects.filter(capitalaccount=self):
+#             holdlist.append(strategy_user.holdlist.all())
+#         return holdlist
 
 class StockLatestRecord(models.Model):
     '''存放账户最新的状态数据
@@ -60,6 +102,7 @@ class StockHistory(models.Model):
     '''存放账户历史结算信息
     '''
     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
+    date = models.DateField()
     rest_capital = models.FloatField(default=0,help_text="资金余额")
     enable_capital = models.FloatField(default=0,help_text="可用资金")
     frozen_capital = models.FloatField(default=0,help_text="冻结资金")
@@ -116,7 +159,7 @@ class StockHoldList(models.Model):
     lastupdate_time = models.DateTimeField(auto_now=True)
     
     def __str__(self):
-        return "{} {}({})".format(self.order_time,self.order_ticket,self.code)
+        return "{}({})".format(self.code,self.account.name)
     
 
 class FuturesLatestRecord(models.Model):
