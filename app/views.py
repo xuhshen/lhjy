@@ -15,6 +15,28 @@ from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework import permissions
 
+
+class SyncViewSet(mixins.UpdateModelMixin,generics.GenericAPIView,mixins.ListModelMixin):
+    serializer_class = AccountSerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    filter_fields = ('account', "id")
+    lookup_field = 'account'
+    def get_queryset(self):
+        queryset = Account.objects.filter()
+        return queryset
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+  
+        return Response(serializer.data)
+    
+    def post(self, request, *args, **kwargs):
+        '''
+        '''
+        return  self.update(request,*args, **kwargs)
+    
+
 # class OrderViewSet(mixins.ListModelMixin,
 #                   mixins.CreateModelMixin,
 #                   mixins.UpdateModelMixin,

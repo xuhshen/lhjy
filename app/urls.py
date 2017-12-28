@@ -3,6 +3,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'^sync/(?P<account>[0-9]+)/$', views.SyncViewSet.as_view()),
 #     url(r'^order/$', views.OrderViewSet.as_view()),
 #     url(r'^cancel/$', views.CancelViewSet.as_view()),
 #     url(r'^account/$', views.CapitalAccountViewSet.as_view()),
