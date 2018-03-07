@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import *
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from .dealer import order,cancel
-
+import json
     
 class AccountSerializer(serializers.ModelSerializer):
     market = serializers.JSONField(write_only=True)
@@ -22,6 +22,7 @@ class AccountSerializer(serializers.ModelSerializer):
         return validated_data
   
     def update(self, instance, validated_data):
+        
         recorddata = {"account":instance,
                       "rest_capital":validated_data["market"].get(u"资金余额",-1),
                       "enable_capital":validated_data["market"].get(u"可用资金",-1),
@@ -32,12 +33,17 @@ class AccountSerializer(serializers.ModelSerializer):
                       "preferred_capital":validated_data["market"].get(u"可取资金",-1),
                       "margin_selling_capital":validated_data["market"].get(u"融券卖出资金",-1),
                       "counters_bought_number":validated_data["market"].get(u"取柜台可买数量",-1),}
-        slr,_ = StockLatestRecord.get_or_create(account=instance)
-        slr.update(**recorddata)
-        slr.save()
+        slr,_ = StockLatestRecord.objects.get_or_create(account=instance)
+        for field, value in recorddata.items():
+            if value is None:
+                value = 0
+            setattr(slr, field, value)
+        slr.save(update_fields=recorddata.keys())
         
+        holdnames = []
         for i in validated_data["holdlist"]:
-            shl,_ = StockHoldList.get_or_create(account=instance,code=i[u"证券代码"])
+            shl,_ = StockHoldList.objects.get_or_create(account=instance,code=i[u"证券代码"])
+            holdnames.append(i[u"证券代码"])
             i_data = {"name":i[u"证券名称"],
                       "number":i[u"证券数量"],
                       "enable_number":i[u"可卖数量"],
@@ -52,11 +58,18 @@ class AccountSerializer(serializers.ModelSerializer):
                       "enable_buy_financing":i[u"融资买入可用"],
                       "value_rate":i[u"个股资产比例"],
                       }
-            shl.update(**i_data)
-            shl.save()
+            for field, value in i_data.items():
+                if value is None:
+                    value = 0
+                setattr(shl, field, value)
+#             shl.update(**i_data)
+            shl.save(update_fields=i_data.keys())
+        for obj in StockHoldList.objects.filter(account=instance):
+            if obj.name not in holdnames:
+                obj.delete()   
         
         for t in validated_data["tickets"]:
-            st,_ = StockTicket.get_or_create(account=instance,code=t[u"证券代码"],order_date=t[u"委托日期"])
+            st,_ = StockTicket.objects.get_or_create(account=instance,code=t[u"证券代码"],order_date=t[u"委托日期"])
             t_data = {"order_time":t[u"委托时间"],
                       "name":t[u"证券名称"],
                       "action":t[u"买卖标志"],
@@ -68,7 +81,11 @@ class AccountSerializer(serializers.ModelSerializer):
                       "cancel_number":t[u"撤单数量"],
                       "cancel_mark":t[u"撤单标志"],
                       }
-            st.update(**t_data)
-            st.save()
+            for field, value in t_data.items():
+                if value is None:
+                    value = 0
+                setattr(st, field, value)
+#             st.update(**t_data)
+            st.save(update_fields=t_data.keys())
         return instance
     
