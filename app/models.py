@@ -39,7 +39,6 @@ class Account(models.Model):
         return "{}({})".format(self.account,self.name)
     
     def getholdlist(self):
-#         holdlist = []
         rst = StockHoldList.objects.filter(account=self,number__gt=0)
         return rst
     
@@ -57,21 +56,24 @@ class Account(models.Model):
         y = datetime.datetime.now().year-1
         y_date = datetime.datetime.strptime("{}-12-28".format(y),'%Y-%m-%d')
         if self.type == "股票":
-            rst = StockHistory.objects.filter(account=self,create_time__gt=y_date).order_by("create_time")[0]
+            rst = StockHistory.objects.filter(account=self,date__gt=y_date).order_by("date")[0]
         else:
-            rst = StockHistory.objects.get(account=self)
+            rst = FuturesHistory.objects.filter(account=self,date__gt=y_date).order_by("date")[0]
         return rst
     
     def getmonstartinfo(self):
         m_date = datetime.datetime.now()-datetime.timedelta(days=30)
         if self.type == "股票":
-            rst = StockHistory.objects.filter(account=self,create_time__gt=m_date).order_by("create_time")[0]
+            rst = StockHistory.objects.filter(account=self,date__gt=m_date).order_by("date")[0]
         else:
-            rst = StockHistory.objects.get(account=self)
+            rst = FuturesHistory.objects.filter(account=self,date__gt=m_date).order_by("date")[0]
         return rst
     
     def getlastinfo(self):
-        rst = StockHistory.objects.filter(account=self).order_by("create_time")[0]
+        if self.type == "股票":
+            rst = StockHistory.objects.filter(account=self).order_by("date")[0]
+        else:
+            rst = FuturesHistory.objects.filter(account=self).order_by("date")[0]
         return rst
 #     def get_holdlist(self):
 #         holdlist = []
@@ -164,12 +166,66 @@ class StockHoldList(models.Model):
 
 class FuturesLatestRecord(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
+    date = models.DateField()
+    rest_capital = models.FloatField(default=0,help_text="资金余额")
+    total_assets = models.FloatField(default=0,help_text="总资产")
+    profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
+    earnest_capital = models.FloatField(default=0,help_text="保证金")
+    create_time = models.DateTimeField(auto_now_add=True)
+    lastupdate_time = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.account.name
 
 class FuturesHistory(models.Model):
+    '''存放期货历史数据信息
+    '''
     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
+    date = models.DateField()
+    rest_capital = models.FloatField(default=0,help_text="资金余额")
+    total_assets = models.FloatField(default=0,help_text="总资产")
+    profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
+    earnest_capital = models.FloatField(default=0,help_text="保证金")
+    create_time = models.DateTimeField(auto_now_add=True)
+    lastupdate_time = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.account.name
+    
 
 class FuturesTicket(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ##################################################################################

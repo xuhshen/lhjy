@@ -39,27 +39,31 @@ class index(generics.GenericAPIView):
             data["total"]["year_profit_money"] += a["accountinfo"].total_assets-a["yearinfo"].total_assets
             data["total"]["mon_profit_money"] += a["accountinfo"].total_assets-a["moninfo"].total_assets
             data["total"]["total_profit_money"] += a["accountinfo"].total_assets-a["initial_capital"]
-            
+             
             if a["type"] == "股票":
                 data["stock"]["account_num"] += 1
                 data["stock"]["value"] += a["accountinfo"].total_assets
                 data["stock"]["year_profit_money"] += a["accountinfo"].total_assets-a["yearinfo"].total_assets
                 data["stock"]["mon_profit_money"] += a["accountinfo"].total_assets-a["moninfo"].total_assets
                 data["stock"]["total_profit_money"] += a["accountinfo"].total_assets-a["initial_capital"]
+                
+                a["holdrate"] = "{}%".format(self.divid(a["accountinfo"].market_value,a["accountinfo"].total_assets)*100)
+                a["history_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["initial_capital"])*100-100)
+                a["day_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["lastinfo"].total_assets)*100-100)
+          
             else:
-                pass
-            
-            a["holdrate"] = "{}%".format(self.divid(a["accountinfo"].market_value,a["accountinfo"].total_assets)*100)
-            a["history_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["initial_capital"])*100-100)
-            
-            a["day_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["lastinfo"].total_assets)*100-100)
-            
+                data["future"]["account_num"] += 1
+                a["holdrate"] = "{}%".format(self.divid(a["accountinfo"].earnest_capital,a["accountinfo"].total_assets)*100)
+                a["history_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["initial_capital"])*100-100)
+                a["day_profit"] = "{}%".format(self.divid(a["accountinfo"].total_assets,a["lastinfo"].total_assets)*100-100)
+                
+             
             data["products"].append(a)
-            
+             
             data["total"]["year_profit"] = self.divid(data["total"]["year_profit_money"],data["total"]["value"])
             data["total"]["mon_profit"] = self.divid(data["total"]["mon_profit_money"],data["total"]["value"])
             data["total"]["total_profit"] = self.divid(data["total"]["total_profit_money"],data["total"]["value"])
-            
+             
             data["stock"]["year_profit"] = self.divid(data["stock"]["year_profit_money"],data["total"]["value"])
             data["stock"]["mon_profit"] = self.divid(data["stock"]["mon_profit_money"],data["total"]["value"])
             data["stock"]["total_profit"] = self.divid(data["stock"]["total_profit_money"],data["total"]["value"])
