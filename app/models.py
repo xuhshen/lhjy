@@ -47,9 +47,9 @@ class Account(models.Model):
     
     def getlatestinfo(self):
         if self.type == "股票":
-            rst = StockLatestRecord.objects.get(account=self)
+            rst = StockHistory.objects.filter(account=self).order_by("-date")[0]
         else:
-            rst = FuturesLatestRecord.objects.get(account=self)
+            rst = FuturesHistory.objects.filter(account=self).order_by("-date")[0]
         return rst
     
     def getyearstartinfo(self):
@@ -81,24 +81,24 @@ class Account(models.Model):
 #             holdlist.append(strategy_user.holdlist.all())
 #         return holdlist
 
-class StockLatestRecord(models.Model):
-    '''存放账户最新的状态数据
-    '''
-    account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
-    rest_capital = models.FloatField(default=0,help_text="资金余额")
-    enable_capital = models.FloatField(default=0,help_text="可用资金")
-    frozen_capital = models.FloatField(default=0,help_text="冻结资金")
-    market_value = models.FloatField(default=0,help_text="最新市值")
-    total_assets = models.FloatField(default=0,help_text="总资产")
-    profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
-    preferred_capital = models.FloatField(default=0,help_text="可取资金")
-    margin_selling_capital = models.FloatField(default=0,help_text="融券卖出资金")
-    counters_bought_number = models.FloatField(default=0,help_text="取柜台可买数量")
-    create_time = models.DateTimeField(auto_now_add=True)
-    lastupdate_time = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.account.name
+# class StockLatestRecord(models.Model):
+#     '''存放账户最新的状态数据
+#     '''
+#     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
+#     rest_capital = models.FloatField(default=0,help_text="资金余额")
+#     enable_capital = models.FloatField(default=0,help_text="可用资金")
+#     frozen_capital = models.FloatField(default=0,help_text="冻结资金")
+#     market_value = models.FloatField(default=0,help_text="最新市值")
+#     total_assets = models.FloatField(default=0,help_text="总资产")
+#     profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
+#     preferred_capital = models.FloatField(default=0,help_text="可取资金")
+#     margin_selling_capital = models.FloatField(default=0,help_text="融券卖出资金")
+#     counters_bought_number = models.FloatField(default=0,help_text="取柜台可买数量")
+#     create_time = models.DateTimeField(auto_now_add=True)
+#     lastupdate_time = models.DateTimeField(auto_now=True)
+#     
+#     def __str__(self):
+#         return self.account.name
 
 class StockHistory(models.Model):
     '''存放账户历史结算信息
@@ -164,18 +164,18 @@ class StockHoldList(models.Model):
         return "{}({})".format(self.code,self.account.name)
     
 
-class FuturesLatestRecord(models.Model):
-    account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
-    date = models.DateField()
-    rest_capital = models.FloatField(default=0,help_text="资金余额")
-    total_assets = models.FloatField(default=0,help_text="总资产")
-    profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
-    earnest_capital = models.FloatField(default=0,help_text="保证金")
-    create_time = models.DateTimeField(auto_now_add=True)
-    lastupdate_time = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return self.account.name
+# class FuturesLatestRecord(models.Model):
+#     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
+#     date = models.DateField()
+#     rest_capital = models.FloatField(default=0,help_text="资金余额")
+#     total_assets = models.FloatField(default=0,help_text="总资产")
+#     profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
+#     earnest_capital = models.FloatField(default=0,help_text="保证金")
+#     create_time = models.DateTimeField(auto_now_add=True)
+#     lastupdate_time = models.DateTimeField(auto_now=True)
+#     
+#     def __str__(self):
+#         return self.account.name
 
 class FuturesHistory(models.Model):
     '''存放期货历史数据信息
