@@ -61,7 +61,7 @@ class index(generics.GenericAPIView):
             
             a["history_profit"] = "{:.2f}%".format(100*(a["accountinfo"].total_assets/a["initial_capital"]-1))
             a["day_profit"] = "{:.2f}%".format(self.divid(a["accountinfo"].profit_loss,a["accountinfo"].total_assets))
-             
+            a["holdnum"] =len(a["holdlist"])
             data["products"].append(a)
              
         data["total"]["year_profit"] = "{:.2f}%".format(self.divid(data["total"]["year_profit_money"],data["total"]["value"]))
