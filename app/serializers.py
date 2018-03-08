@@ -40,7 +40,7 @@ class AccountSerializer(serializers.ModelSerializer):
                 if value is None:
                     value = 0
                     recorddata[field] = value
-            StockHistory.objects.update_or_create(**recorddata)
+            StockHistory.objects.update_or_create(date=date,account=instance,defaults=recorddata)
             
             holdnames = []
             for i in validated_data["holdlist"]:
@@ -88,6 +88,7 @@ class AccountSerializer(serializers.ModelSerializer):
                     setattr(st, field, value)
                 st.save(update_fields=t_data.keys())
         else:
+            print(validated_data)
             recorddata = {"account":instance,
                           "date":date,
                           "rest_capital":validated_data["market"].get(u"资金余额",-1),
@@ -99,7 +100,7 @@ class AccountSerializer(serializers.ModelSerializer):
                 if value is None:
                     value = 0
                     recorddata[field] = value
-            FuturesHistory.objects.update_or_create(**recorddata)
+            FuturesHistory.objects.update_or_create(date=date,account=instance,defaults=recorddata)
         
         return instance
     
