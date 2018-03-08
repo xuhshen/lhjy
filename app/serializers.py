@@ -92,9 +92,9 @@ class AccountSerializer(serializers.ModelSerializer):
             recorddata = {"account":instance,
                           "date":date,
                           "rest_capital":validated_data["market"].get(u"资金余额",-1),
-                          "total_assets":validated_data["market"].get(u"可用资金",-1),
-                          "profit_loss":validated_data["market"].get(u"冻结资金",-1),
-                          "earnest_capital":validated_data["market"].get(u"最新市值",-1),
+                          "total_assets":validated_data["market"].get(u"最新市值",-1),
+                          "profit_loss":validated_data["market"].get(u"浮动盈亏",-1),
+                          "earnest_capital":validated_data["market"].get(u"冻结资金",-1),
                           }
             for field, value in recorddata.items():
                 if value is None:
