@@ -88,7 +88,6 @@ class AccountSerializer(serializers.ModelSerializer):
                     setattr(st, field, value)
                 st.save(update_fields=t_data.keys())
         else:
-            print(validated_data)
             recorddata = {"account":instance,
                           "date":date,
                           "rest_capital":validated_data["market"].get(u"资金余额",-1),
