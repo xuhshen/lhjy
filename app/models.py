@@ -26,11 +26,19 @@ class Company(models.Model):
     def __str__(self):
         return self.name
     
+class Project(models.Model):
+    '''项目名字
+    '''
+    name = models.CharField(max_length=200,help_text="项目名字")
+    def __str__(self):
+        return self.name
+    
 class Account(models.Model):
     name = models.CharField(max_length=100,help_text="账户名")
     account = models.CharField(max_length=50,help_text="账户号")
     type = models.CharField(max_length=50,default="股票",help_text="账户类型")
     company = models.ForeignKey(Company, on_delete=models.CASCADE,help_text="券商") 
+    project = models.ForeignKey(Project, on_delete=models.CASCADE,help_text="项目") 
     initial_capital = models.FloatField(default=0,help_text="初始资金")
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
@@ -39,7 +47,13 @@ class Account(models.Model):
         return "{}({})".format(self.account,self.name)
     
     def getholdlist(self):
-        rst = StockHoldList.objects.filter(account=self,number__gt=0)
+        
+        if self.type == "股票":
+            rst = StockHoldList.objects.filter(account=self,number__gt=0)
+        else:
+            rst = FuturesHoldList.objects.filter(account=self,number__gt=0)
+        return rst
+        
         return rst
     
     def getholdnum(self):
@@ -199,7 +213,7 @@ class FuturesHoldList(models.Model):
     number = models.FloatField(default=0,help_text="持仓数量")
     useMargin = models.FloatField(default=0,help_text="占用保证金")
     cost = models.FloatField(default=0,help_text="持仓成本")
-    direction = models.FloatField(default=0,help_text="交易方向")
+    direction = models.FloatField(default=0,help_text="交易方向(2:买入 3:卖出)")
     profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
     
     create_time = models.DateTimeField(auto_now_add=True)

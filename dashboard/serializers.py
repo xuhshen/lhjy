@@ -10,6 +10,7 @@ class IndexSerializer(serializers.ModelSerializer):
     yearinfo = serializers.JSONField(source="getyearstartinfo")
     moninfo = serializers.JSONField(source="getmonstartinfo")
     holdnum = serializers.FloatField(source="getholdnum")
+    project = serializers.CharField(source="project.name")
     
     class Meta:
         model = Account

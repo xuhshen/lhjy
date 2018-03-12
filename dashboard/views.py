@@ -12,6 +12,7 @@ from rest_framework import generics
 from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework import permissions
+from _ast import Lambda
 
 class index(generics.GenericAPIView):
     """
@@ -88,10 +89,56 @@ class index(generics.GenericAPIView):
         data["number"] += len(newdata["holdlist"])
         data["marketvalue"] += newdata["market_value"]
 
+
+
+class holdlist(generics.GenericAPIView):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+#     permission_classes = (permissions.IsAdminUser,)
+     
+    queryset = Account.objects.all()
+    serializer_class = IndexSerializer
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        data = {}
+        for a in serializer.data:
+            project = a["project"]
+#             name = a["name"]
+            if not data.__contains__(project):
+                data[project] = {"股票":[],
+                                 "期货":[]}
+            
+            if a["type"] == "股票":
+                for item in a["holdlist"]:
+                    d = {}
+                    d["code"] = item.code
+                    d["name"] = item.name
+                    d["value"] = item.market_value
+                    d["number"] = item.number
+                    d["profit_loss"] = item.profit_loss
+                    data[project]["股票"].append(d)
+            else:
+                for item in a["holdlist"]:
+                    d = {}
+                    d["name"] = item.code
+                    d["useMargin"] =  item.useMargin
+                    d["number"] = item.number
+                    d["profit_loss"] = item.profit_loss
+                    d["direction"] = (lambda x :"买入" if x==2 else "卖出")(item.direction)
+                    data[project]["期货"].append(d)
+#         
+#     
+        return render(request, 'holdlist.html',{"data":data})
+
+
 def product(request):
     return render(request, 'product.html')
 
-def holdlist(request):
-    return render(request, 'holdlist.html')
+# def holdlist(request):
+#     
+#     return render(request, 'holdlist.html')
 
 
