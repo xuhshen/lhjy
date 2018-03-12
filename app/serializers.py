@@ -42,11 +42,8 @@ class AccountSerializer(serializers.ModelSerializer):
                     recorddata[field] = value
             StockHistory.objects.update_or_create(date=date,account=instance,defaults=recorddata)
             
-            holdnames = []
             for i in validated_data["holdlist"]:
-                print (i)
                 shl,_ = StockHoldList.objects.get_or_create(account=instance,code=i[u"证券代码"])
-                holdnames.append(i[u"证券代码"])
                 i_data = {"name":i[u"证券名称"],
                           "number":i[u"证券数量"],
                           "enable_number":i[u"可卖数量"],
@@ -66,12 +63,8 @@ class AccountSerializer(serializers.ModelSerializer):
                         value = 0
                     setattr(shl, field, value)
                 shl.save(update_fields=i_data.keys())
-            for obj in StockHoldList.objects.filter(account=instance):
-                if obj.name not in holdnames:
-                    obj.delete()   
             
             for t in validated_data["tickets"]:
-                print (t)
                 st,_ = StockTicket.objects.get_or_create(account=instance,code=t[u"证券代码"],\
                                                          order_date=t[u"委托日期"],order_time=t[u"委托时间"])
                 t_data = {"order_time":t[u"委托时间"],
