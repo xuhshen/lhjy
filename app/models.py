@@ -193,9 +193,17 @@ class FuturesHistory(models.Model):
         return self.account.name
     
 
-class FuturesTicket(models.Model):
+class FuturesHoldList(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
-
+    code = models.CharField(max_length=30,help_text="合约代码")
+    number = models.FloatField(default=0,help_text="持仓数量")
+    useMargin = models.FloatField(default=0,help_text="占用保证金")
+    cost = models.FloatField(default=0,help_text="持仓成本")
+    direction = models.FloatField(default=0,help_text="交易方向")
+    profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
+    
+    create_time = models.DateTimeField(auto_now_add=True)
+    lastupdate_time = models.DateTimeField(auto_now=True)
 
 
 

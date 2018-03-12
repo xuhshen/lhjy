@@ -100,6 +100,22 @@ class AccountSerializer(serializers.ModelSerializer):
                     value = 0
                     recorddata[field] = value
             FuturesHistory.objects.update_or_create(date=date,account=instance,defaults=recorddata)
+            
+            holdnames = []
+            for i in validated_data["holdlist"]:
+                shl,_ = StockHoldList.objects.get_or_create()
+                holdnames.append(i[u"合约代码"])
+                i_data = {
+                          "number":i["Position"],
+                          "useMargin":i["UseMargin"],
+                          "cost":i["PositionCost"],
+                          "direction":i["PosiDirection"],
+                          "profit_loss":i["PositionProfit"],
+                          }
+                FuturesHoldList.objects.update_or_create(account=instance,code=i[u"合约代码"],defaults=i_data)
+            for obj in FuturesHoldList.objects.filter(account=instance):
+                if obj.name not in holdnames:
+                    obj.delete()   
         
         return instance
     
