@@ -138,18 +138,18 @@ class StockTicket(models.Model):
     '''存放股票历史委托单信息
     '''
     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
-    order_date = models.DateField(help_text="委托日期")
-    order_time = models.DateTimeField(help_text="委托时间") 
+    order_date = models.CharField(max_length=200,help_text="委托日期")
+    order_time = models.CharField(max_length=200,help_text="委托时间") 
     code = models.CharField(max_length=30,help_text="证券代码")
     name = models.CharField(max_length=30,help_text="证券名称")
-    action = models.ForeignKey(Action, on_delete=models.CASCADE,help_text="买卖标志") 
+    action = models.CharField(max_length=30,help_text="买卖标志")
     order_price = models.FloatField(default=0,help_text="委托价格")
     order_number = models.FloatField(default=0,help_text="委托数量")
     order_ticket = models.CharField(max_length=30,help_text="委托编号")
     deal_number = models.FloatField(default=0,help_text="成交数量")
     deal_money = models.FloatField(default=0,help_text="成交金额")
     cancel_number = models.FloatField(default=0,help_text="撤单数量")
-    cancel_mark = models.BooleanField(help_text="撤单标志")
+    cancel_mark = models.CharField(max_length=30,help_text="撤单标志")
     
     def __str__(self):
         return "{} {}({})".format(self.order_time,self.order_ticket,self.code)

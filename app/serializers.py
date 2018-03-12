@@ -44,6 +44,7 @@ class AccountSerializer(serializers.ModelSerializer):
             
             holdnames = []
             for i in validated_data["holdlist"]:
+                print (i)
                 shl,_ = StockHoldList.objects.get_or_create(account=instance,code=i[u"证券代码"])
                 holdnames.append(i[u"证券代码"])
                 i_data = {"name":i[u"证券名称"],
@@ -54,7 +55,7 @@ class AccountSerializer(serializers.ModelSerializer):
                           "current_price":i[u"当前价"],
                           "market_value":i[u"最新市值"],
                           "profit_loss":i[u"浮动盈亏"],
-                          "profit_loss_rate":i[u"盈亏比例"],
+                          "profit_loss_rate":i[u"盈亏比例(%)"],
                           "buy_financing_balance":i[u"融资买入证券实时余额"],
                           "rest_buy_financing":i[u"融资买入余额"],
                           "enable_buy_financing":i[u"融资买入可用"],
@@ -70,7 +71,9 @@ class AccountSerializer(serializers.ModelSerializer):
                     obj.delete()   
             
             for t in validated_data["tickets"]:
-                st,_ = StockTicket.objects.get_or_create(account=instance,code=t[u"证券代码"],order_date=t[u"委托日期"])
+                print (t)
+                st,_ = StockTicket.objects.get_or_create(account=instance,code=t[u"证券代码"],\
+                                                         order_date=t[u"委托日期"],order_time=t[u"委托时间"])
                 t_data = {"order_time":t[u"委托时间"],
                           "name":t[u"证券名称"],
                           "action":t[u"买卖标志"],
