@@ -204,6 +204,9 @@ class FuturesHoldList(models.Model):
     
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.code
 
 
 

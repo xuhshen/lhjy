@@ -12,7 +12,7 @@ admin.site.register(StockTicket)
 admin.site.register(StockHoldList)
 # admin.site.register(FuturesLatestRecord)
 admin.site.register(FuturesHistory)
-#admin.site.register(FuturesTicket)
+admin.site.register(FuturesHoldList)
 
 
 
