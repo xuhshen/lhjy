@@ -118,7 +118,7 @@ class holdlist(generics.GenericAPIView):
                     d["name"] = item.name
                     d["value"] = item.market_value
                     d["number"] = item.number
-                    d["profit_loss"] = item.profit_loss
+                    d["profit_loss"] = "{:.2f}".format(item.profit_loss)
                     data[project]["股票"].append(d)
             else:
                 for item in a["holdlist"]:
@@ -126,7 +126,7 @@ class holdlist(generics.GenericAPIView):
                     d["name"] = item.code
                     d["useMargin"] =  item.useMargin
                     d["number"] = item.number
-                    d["profit_loss"] = item.profit_loss
+                    d["profit_loss"] = "{:.2f}".format(item.profit_loss)
                     d["direction"] = (lambda x :"买入" if x==2 else "卖出")(item.direction)
                     data[project]["期货"].append(d)
 #         
