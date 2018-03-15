@@ -66,6 +66,17 @@ class Account(models.Model):
             rst = FuturesHistory.objects.filter(account=self).order_by("-date")[0]
         return rst
     
+    
+    def getyesterdayinfo(self):
+        try:
+            if self.type == "股票":
+                rst = StockHistory.objects.filter(account=self).order_by("-date")[1]
+            else:
+                rst = FuturesHistory.objects.filter(account=self).order_by("-date")[1]
+        except:
+            rst = {}
+        return rst
+    
     def getyearstartinfo(self):
         y = datetime.datetime.now().year-1
         y_date = datetime.datetime.strptime("{}-12-28".format(y),'%Y-%m-%d')

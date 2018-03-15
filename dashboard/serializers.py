@@ -8,6 +8,7 @@ class IndexSerializer(serializers.ModelSerializer):
     lastinfo = serializers.JSONField(source="getlastinfo")
     accountinfo = serializers.JSONField(source="getlatestinfo")
     yearinfo = serializers.JSONField(source="getyearstartinfo")
+    yesterdayinfo = serializers.JSONField(source="getyesterdayinfo")
     moninfo = serializers.JSONField(source="getmonstartinfo")
     holdnum = serializers.FloatField(source="getholdnum")
     project = serializers.CharField(source="project.name")

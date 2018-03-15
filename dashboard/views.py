@@ -40,7 +40,7 @@ class index(generics.GenericAPIView):
             data["total"]["year_profit_money"] += a["accountinfo"].total_assets-a["yearinfo"].total_assets
             data["total"]["mon_profit_money"] += a["accountinfo"].total_assets-a["moninfo"].total_assets
             data["total"]["total_profit_money"] += a["accountinfo"].total_assets-a["initial_capital"]
-            data["total"]["day_profit_money"] += a["accountinfo"].profit_loss
+            data["total"]["day_profit_money"] += a["accountinfo"].total_assets-a["yesterdayinfo"].total_assets
              
             if a["type"] == "股票":
                 data["stock"]["account_num"] += 1
@@ -48,7 +48,7 @@ class index(generics.GenericAPIView):
                 data["stock"]["year_profit_money"] += a["accountinfo"].total_assets-a["yearinfo"].total_assets
                 data["stock"]["mon_profit_money"] += a["accountinfo"].total_assets-a["moninfo"].total_assets
                 data["stock"]["total_profit_money"] += a["accountinfo"].total_assets-a["initial_capital"]
-                a["holdrate"] = "{:.2f}%".format(self.divid(a["accountinfo"].market_value,a["accountinfo"].total_assets)*100)
+                a["holdrate"] = "{:.2f}%".format(100*a["accountinfo"].market_value/a["accountinfo"].total_assets)
           
             else:
                 data["future"]["account_num"] += 1
@@ -59,7 +59,7 @@ class index(generics.GenericAPIView):
                 a["holdrate"] = "{:.2f}%".format(100*a["accountinfo"].earnest_capital/a["accountinfo"].total_assets)
             
             a["history_profit"] = "{:.2f}%".format(100*(a["accountinfo"].total_assets/a["initial_capital"]-1))
-            a["day_profit"] = "{:.2f}%".format(self.divid(a["accountinfo"].profit_loss,a["accountinfo"].total_assets))
+            a["day_profit"] = "{:.2f}%".format(100*(a["accountinfo"].total_assets-a["yesterdayinfo"].total_assets)/a["yesterdayinfo"].total_assets)
             a["holdnum"] =len(a["holdlist"])
             data["products"].append(a)
              
@@ -120,6 +120,7 @@ class holdlist(generics.GenericAPIView):
                     data[project]["股票"].append(d)
             else:
                 for item in a["holdlist"]:
+                    if "&" in item.code:continue
                     d = {}
                     d["name"] = item.code
                     d["useMargin"] =  item.useMargin
@@ -153,8 +154,5 @@ def value(request,account):
                                          "ymax":max([i[1] for i in values]),
                                          "name":account})
 
-# def holdlist(request):
-#     
-#     return render(request, 'holdlist.html')
 
 
