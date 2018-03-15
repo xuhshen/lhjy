@@ -36,7 +36,15 @@
                 data: {{x|safe }}
             },
             yAxis: {min:{{ymin}},
-            	    max:{{ymax}}},
+            	    max:{{ymax}},
+            	    axisLabel: {
+                        formatter: function(value, index){
+                            return value.toFixed(3);
+                        }
+                    }
+            	    
+            },
+            	    
             series: [{
                 name: '净值',
                 type: 'line',
