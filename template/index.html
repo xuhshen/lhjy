@@ -59,7 +59,7 @@
         <tbody>
        	{% for product in data.products %}
 	         <tr>
-	            <td>{{product.name}}</td>
+	            <td><a href="/value/{{product.name}}">{{product.name}}</a></td>
 	            <td>{{product.create_time}}</td>
 	            <td><a href="#">{{product.holdnum}}</a></td>
 	            <td>{{product.holdrate}}</td>

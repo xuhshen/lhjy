@@ -12,8 +12,6 @@ from rest_framework import generics
 from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework import permissions
-from _ast import Lambda
-
 class index(generics.GenericAPIView):
     """
     API endpoint that allows users to be viewed or edited.
@@ -136,7 +134,24 @@ class holdlist(generics.GenericAPIView):
 
 
 def product(request):
+    
+    
+    
     return render(request, 'product.html')
+
+def value(request,account):
+    acc = Account.objects.get(name=account)
+    if acc.type == "股票":
+        rst = StockHistory.objects.filter(account=acc)
+    else:
+        rst = FuturesHistory.objects.filter(account=acc)
+    values = [[i.date,i.total_assets/acc.initial_capital] for i in rst]
+    values = sorted(values, key=lambda x:(x[0] ))
+    return render(request, 'value.html',{"x":[i[0].strftime('%Y-%m-%d') for i in values],
+                                         "y":[i[1] for i in values],
+                                         "ymin":min([i[1] for i in values]),
+                                         "ymax":max([i[1] for i in values]),
+                                         "name":account})
 
 # def holdlist(request):
 #     

@@ -1,0 +1,70 @@
+<!doctype html>
+<html class="no-js">
+<head>
+	{% include 'head.html' %}
+	 <script src="/static/js/echarts.common.min.js"></script>
+</head>
+
+<body>
+{% include 'framework.html' %}
+
+<div class=" admin-content">
+	
+		<div class="daohang">
+<!--  		<ul>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs"> 首页 </li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">帮助中心<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">奖金管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">产品管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
+			</ul>-->	
+		</div>
+	
+<div class="admin-biaogelist">
+	
+  <div id="main" style="width: 1200px;height:400px;"></div>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+        var option = {
+            title: {
+                text: '{{name}} '
+            },
+            tooltip: {},
+            legend: {
+                data:['净值']
+            },
+            xAxis: {
+                data: {{x|safe }}
+            },
+            yAxis: {min:{{ymin}},
+            	    max:{{ymax}}},
+            series: [{
+                name: '净值',
+                type: 'line',
+                data:{{y}}
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
+ 
+ 
+ {% include 'foot.html' %}
+
+
+
+
+</div>
+
+</div>
+
+
+
+
+
+<script src="/static/js/amazeui.min.js"></script>
+
+
+
+</body>
+</html>
