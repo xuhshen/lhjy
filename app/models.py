@@ -40,6 +40,12 @@ class Account(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE,help_text="券商") 
     project = models.ForeignKey(Project, on_delete=models.CASCADE,help_text="项目") 
     initial_capital = models.FloatField(default=0,help_text="初始资金")
+    
+    rest_capital = models.FloatField(default=0,help_text="资金余额")
+    total_assets = models.FloatField(default=0,help_text="总资产")
+    earnest_capital = models.FloatField(default=0,help_text="保证金")
+    
+    
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
     
@@ -100,6 +106,16 @@ class Account(models.Model):
         else:
             rst = FuturesHistory.objects.filter(account=self).order_by("date")[0]
         return rst
+
+class Moneyhistory(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
+    date = models.DateField()
+    money = models.FloatField(default=0,help_text="资金进出")
+    description = models.TextField(default="",blank=True,help_text="资金进出说明")
+    
+    def __str__(self):
+        return self.account.name 
+
 #     def get_holdlist(self):
 #         holdlist = []
 #         for strategy_user in StrategyUser.objects.filter(capitalaccount=self):
@@ -222,6 +238,7 @@ class FuturesHoldList(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE,help_text="交易账户") 
     code = models.CharField(max_length=30,help_text="合约代码")
     number = models.FloatField(default=0,help_text="持仓数量")
+    rate = models.FloatField(default=0,help_text="保证金率")
     useMargin = models.FloatField(default=0,help_text="占用保证金")
     cost = models.FloatField(default=0,help_text="持仓成本")
     direction = models.FloatField(default=0,help_text="交易方向(2:买入 3:卖出)")

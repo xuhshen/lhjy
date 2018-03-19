@@ -24,7 +24,7 @@ class AccountSerializer(serializers.ModelSerializer):
   
     def update(self, instance, validated_data):
         date = datetime.datetime.now().date()
-        if instance.type == "股票":
+        if instance.type == "股票" or instance.type == "固收":
             recorddata = {"account":instance,
                           "date":date,
                           "rest_capital":validated_data["market"].get(u"资金余额",-1),
@@ -41,6 +41,8 @@ class AccountSerializer(serializers.ModelSerializer):
                     value = 0
                     recorddata[field] = value
             StockHistory.objects.update_or_create(date=date,account=instance,defaults=recorddata)
+            instance.rest_capital=recorddata["rest_capital"]
+            instance.total_assets=recorddata["total_assets"]
             
             for i in validated_data["holdlist"]:
                 shl,_ = StockHoldList.objects.get_or_create(account=instance,code=i[u"证券代码"])
@@ -96,6 +98,9 @@ class AccountSerializer(serializers.ModelSerializer):
                     value = 0
                     recorddata[field] = value
             FuturesHistory.objects.update_or_create(date=date,account=instance,defaults=recorddata)
+            instance.rest_capital=recorddata["rest_capital"]
+            instance.total_assets=recorddata["total_assets"]
+            instance.earnest_capital=recorddata["earnest_capital"]
             
             holdnames = []
             for i in validated_data["holdlist"]:
@@ -106,11 +111,13 @@ class AccountSerializer(serializers.ModelSerializer):
                           "cost":i["PositionCost"],
                           "direction":i["PosiDirection"],
                           "profit_loss":i["PositionProfit"],
+                          "rate":i["MarginRateByMoney"]
                           }
                 FuturesHoldList.objects.update_or_create(account=instance,code=i["InstrumentID"],defaults=i_data)
             for obj in FuturesHoldList.objects.filter(account=instance):
                 if obj.code not in holdnames:
                     obj.delete()   
+        instance.save()
         
         return instance
     

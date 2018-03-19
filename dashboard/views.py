@@ -12,7 +12,10 @@ from rest_framework import generics
 from datetime import date
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework import permissions
-class index(generics.GenericAPIView):
+import collections
+import pandas as pd
+
+class product(generics.GenericAPIView):
     """
     API endpoint that allows users to be viewed or edited.
     """
@@ -134,9 +137,81 @@ class holdlist(generics.GenericAPIView):
         return render(request, 'holdlist.html',{"data":data})
 
 
-def product(request):
+def index(request):
+    rst = collections.OrderedDict()
+    accounts = Account.objects.all()
+    for acc in accounts:
+        changehistory = Moneyhistory.objects.filter(account=acc).all()
+        
+        project = acc.project.name
+        money = acc.total_assets
+        rest = acc.rest_capital
+        earnest = acc.earnest_capital
+        
+        initial = acc.initial_capital
+        for i in changehistory:
+            initial += i.money
+        
+        if rst.__contains__(project):
+            rst[project]["总资产"] += money
+        else:
+            rst[project] = collections.OrderedDict()
+            rst[project]["stock"] = {}
+            rst[project]["future"] = {}
+            rst[project]["change"] = {}
+            rst[project]["产品名字"] = project
+            rst[project]["总资产"] = money
+            rst[project]["净值"] = 1
+            fields = ["总盈亏","股票盈亏","股票持仓","期货盈亏","期货持仓","固收盈亏"]
+            for fd in fields:
+                rst[project][fd] = 0
+           
+            
+        if acc.type == "股票":
+            rst[project]["股票盈亏"] += money - initial
+            rst[project]["股票持仓"] += money - rest
+        elif acc.type == "期货":
+            rst[project]["期货盈亏"] += money - initial
+            rst[project]["期货持仓"] += earnest
+        elif acc.type == "对冲":
+            rst[project]["对冲盈亏"] += money - initial
+            rst[project]["对冲持仓"] += earnest
+        else:
+            rst[project]["固收盈亏"] += money - initial
+        
+        rst[project]["总盈亏"] += money - initial
+        
+        stockhistory = StockHistory.objects.filter(account=acc).all()
+        futurehistory = FuturesHistory.objects.filter(account=acc).all()
+        for i in stockhistory:
+            if rst[project]["stock"].__contains__(i.date):
+                rst[project]["stock"][i.date] += i.total_assets
+            else:
+                rst[project]["stock"][i.date] = i.total_assets
+        for i in futurehistory:
+            if rst[project]["future"].__contains__(i.date):
+                rst[project]["future"][i.date] += i.total_assets
+            else:
+                rst[project]["future"][i.date] = i.total_assets
+        for i in changehistory:
+            if rst[project]["change"].__contains__(i.date):
+                rst[project]["change"][i.date] += i.money
+            else:
+                rst[project]["change"][i.date] = i.money
+            
     
-    
+    for project in rst.keys():
+        df = pd.DataFrame({"stock":rst[project]["stock"],
+                           "future":rst[project]["future"],
+                           "change":rst[project]["change"]})
+        df.ix[0,"initial"] = 1
+        df.fillna(0,inplace=True)
+        df.loc[df["initial"]==0,"initial"] = 1+ df.loc[df["initial"]==0,"change"]/df[df["initial"]==0][["stock","future"]].sum(axis=1) 
+        df.loc[:,"initial"] = df["initial"].cumprod()
+        rst[project]["净值"] = df.ix[-1][["stock","future"]].sum() /df.ix[-1,"initial"]
+#         rst[project]["股票敞口"] = rst[project]["股票持仓"] - 
+         
+#     产品名、总资产、净值、总盈亏率、股票盈亏、对冲盈亏、期货盈亏、固收盈亏、股票敞口、期货敞口、股票多头占比、期货风险度、期货杠杆
     
     return render(request, 'product.html')
 
