@@ -59,7 +59,6 @@ def product(request,project):
         try:
             rst[acc.name]["今日收益"] = "{:.2f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"]-100))
         except:pass
-        print (df)
     return render(request, 'index.html',{"data":rst})
 
 class holdlist(generics.GenericAPIView):
