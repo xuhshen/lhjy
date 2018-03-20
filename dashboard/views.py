@@ -36,13 +36,15 @@ def product(request,project):
         rst[acc.name]["今日收益"] = 0
         rst[acc.name]["累计收益"] = 0
         rst[acc.name]["最新净值"] = 0
+        rst[acc.name]["账户市值"] = "{:.1f}".format(money)
         
         if acc.type in ["股票","固收"]:
             rst[acc.name]["持仓个数"] = StockHoldList.objects.filter(account=acc).count()
-            rst[acc.name]["持仓比例"] = "{:.2f}%".format(100*rest/money)
+            rst[acc.name]["持仓比例"] = "{:.2f}%".format(100*(1-rest/money))
             temp["account"] = {i.date:i.total_assets for i in StockHistory.objects.filter(account=acc)}
         else:
             rst[acc.name]["持仓个数"] = FuturesHoldList.objects.filter(account=acc).count()
+            rst[acc.name]["持仓比例"] = "{:.2f}%".format(100*earnest/money)
             temp["account"] = {i.date:i.total_assets for i in FuturesHistory.objects.filter(account=acc)}
         
         temp["change"] = {i.date:i.money for i in Moneyhistory.objects.filter(account=acc)}
@@ -53,9 +55,10 @@ def product(request,project):
         df = pd.DataFrame(temp)
         df.ix[0,"initial"] = df.ix[0,"account"]
         df.fillna(0,inplace=True)
-        df.loc[df["initial"]==0,"initial"] = 1+df.loc[df["initial"]==0,"change"]/(df[df["initial"]==0]["account"]-df.loc[df["initial"]==0,"change"]) 
+        filt = df["initial"]==0
+        df.loc[df["initial"]==0,"initial"] = 1+df.loc[filt,"change"]/(df.loc[filt,"account"]-df.loc[filt,"change"]) 
         df.loc[:,"initial"] = df["initial"].cumprod()
-        rst[acc.name]["最新净值"] = df.ix[-1]["account"]/df.ix[-1,"initial"]
+        rst[acc.name]["最新净值"] = "{:.2f}".format(df.ix[-1]["account"]/df.ix[-1,"initial"])
         try:
             rst[acc.name]["今日收益"] = "{:.2f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"]-100))
         except:pass
