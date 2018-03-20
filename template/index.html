@@ -21,16 +21,6 @@
   
 <div class="admin">
    <div class="admin-index">
-      <dl data-am-scrollspy="{animation: 'slide-right', delay: 100}">
-        <dt class="qs"><i class="am-icon-user"></i></dt>
-        <dd>{{data.stock.account_num}}</dd>
-        <dd class="f12">股票账户</dd>
-      </dl>
-      <dl data-am-scrollspy="{animation: 'slide-right', delay: 300}">
-        <dt class="cs"><i class="am-icon-user"></i></dt>
-        <dd>{{data.future.account_num}}</dd>
-        <dd class="f12">期货账户</dd>
-      </dl>
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 600}">
         <dt class="hs"><i class="am-icon-line-chart"></i></dt>
         <dd>{{data.total.day_profit}}</dd>
@@ -42,30 +32,29 @@
         <dd class="f12">累计收益</dd>
       </dl>
     </div>
+    
     <div class="admin-biaoge">
       <div class="xinxitj">账户信息</div>
       <table class="am-table">
         <thead>
           <tr>
-            <th>产品名字</th>
-            <th>发型时间</th>
+            <th>账户名称</th>
+            <th>起始时间</th>
             <th>持仓个数</th>
             <th>持仓比例</th>
             <th>今日收益</th>
             <th>累计收益</th>
-            <th>产品类型</th>
           </tr>
         </thead>
         <tbody>
-       	{% for product in data.products %}
+       	{% for account in data.values %}
 	         <tr>
-	            <td><a href="/value/{{product.name}}">{{product.name}}</a></td>
-	            <td>{{product.create_time}}</td>
-	            <td><a href="#">{{product.holdnum}}</a></td>
-	            <td>{{product.holdrate}}</td>
-	            <td>{{product.day_profit}}</td>
-	            <td>{{product.history_profit}} </td>
-	            <td>{{product.type}} </td>
+	            <td><a href="/value/{{product.name}}">{{account.账户名称}}</a></td>
+	            <td>{{account.起始时间}}</td>
+	            <td><a href="#">{{account.持仓个数}}</a></td>
+	            <td>{{account.持仓比例}}</td>
+	            <td>{{account.今日收益}}</td>
+	            <td>{{account.累计收益}} </td>
 	          </tr>
         {% endfor %}
         </tbody>
