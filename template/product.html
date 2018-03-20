@@ -57,52 +57,21 @@
 
     <form class="am-form am-g">
           <table width="100%" class="am-table am-table-bordered am-table-radius am-table-striped">
-          
             <thead>
               <tr class="">
-                <th class="table-title">名字</th>
-                <th class="table-id">ID</th>
-                <th class="table-title">总资产</th>
-                <th class="table-type">净值</th>
-                <th class="table-type">总盈亏率</th>
-                <th class="table-type">股票盈亏</th>
-                <th class="table-type">期货盈亏</th>
-                <th class="table-type">总敞口比</th>
-                <th class="table-type">股票敞口比</th>
-                <th class="table-type">期货敞口比</th>
-                <th class="table-type">股票占比</th>
-                <th class="table-type">期货风险度</th>
+              {% for i in fd %}
+                <th class="table-title">{{i}}</th>
+              {% endfor %}  
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>基金一号</td>
-                <td>1</td>
-                <td><a href="#">10000</a></td>
-                <td>1.01</td>
-                <td>10%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-              </tr>
-              <tr>
-                <td>基金二号</td>
-                <td>2</td>
-                <td><a href="#">10000</a></td>
-                <td>1.02</td>
-                <td>13%</td>
-                <td>6%</td>
-                <td>7%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-                <td>5%</td>
-              </tr>
+         <tbody>
+            {% for project in data.values %}
+	            <tr>
+	               {% for v in project.values %}
+	                 <td>{{v}}</td>
+	               {% endfor %}
+	             </tr>
+            {% endfor %}
             </tbody>
           </table>
           

@@ -139,7 +139,11 @@ class holdlist(generics.GenericAPIView):
 
 def index(request):
     rst = collections.OrderedDict()
+    temp = {}
     accounts = Account.objects.all()
+    fields = ["产品名字","总资产","净值","总盈亏率","总盈亏","股票盈亏","股票持仓",
+              "对冲盈亏","对冲持仓","期货盈亏","期货持仓","固收盈亏","股票敞口",
+              "期货敞口","股票多头占比","期货风险度","期货杠杆"]
     for acc in accounts:
         changehistory = Moneyhistory.objects.filter(account=acc).all()
         
@@ -156,16 +160,18 @@ def index(request):
             rst[project]["总资产"] += money
         else:
             rst[project] = collections.OrderedDict()
-            rst[project]["stock"] = {}
-            rst[project]["future"] = {}
-            rst[project]["change"] = {}
+            temp[project] = {}
+            for k in fields:
+                rst[project][k] = 0
+            temp[project]["stock"] = {}
+            temp[project]["future"] = {}
+            temp[project]["change"] = {}
             rst[project]["产品名字"] = project
             rst[project]["总资产"] = money
             rst[project]["净值"] = 1
-            fields = ["总盈亏","股票盈亏","股票持仓","期货盈亏","期货持仓","固收盈亏"]
-            for fd in fields:
+            subfields = ["总盈亏","股票盈亏","股票持仓","期货盈亏","期货持仓","固收盈亏"]
+            for fd in subfields:
                 rst[project][fd] = 0
-           
             
         if acc.type == "股票":
             rst[project]["股票盈亏"] += money - initial
@@ -184,36 +190,40 @@ def index(request):
         stockhistory = StockHistory.objects.filter(account=acc).all()
         futurehistory = FuturesHistory.objects.filter(account=acc).all()
         for i in stockhistory:
-            if rst[project]["stock"].__contains__(i.date):
-                rst[project]["stock"][i.date] += i.total_assets
+            if temp[project]["stock"].__contains__(i.date):
+                temp[project]["stock"][i.date] += i.total_assets
             else:
-                rst[project]["stock"][i.date] = i.total_assets
+                temp[project]["stock"][i.date] = i.total_assets
         for i in futurehistory:
-            if rst[project]["future"].__contains__(i.date):
-                rst[project]["future"][i.date] += i.total_assets
+            if temp[project]["future"].__contains__(i.date):
+                temp[project]["future"][i.date] += i.total_assets
             else:
-                rst[project]["future"][i.date] = i.total_assets
+                temp[project]["future"][i.date] = i.total_assets
         for i in changehistory:
-            if rst[project]["change"].__contains__(i.date):
-                rst[project]["change"][i.date] += i.money
+            if temp[project]["change"].__contains__(i.date):
+                temp[project]["change"][i.date] += i.money
             else:
-                rst[project]["change"][i.date] = i.money
+                temp[project]["change"][i.date] = i.money
             
     
-    for project in rst.keys():
-        df = pd.DataFrame({"stock":rst[project]["stock"],
-                           "future":rst[project]["future"],
-                           "change":rst[project]["change"]})
-        df.ix[0,"initial"] = 1
+    for project in temp.keys():
+        df = pd.DataFrame({"stock":temp[project]["stock"],
+                           "future":temp[project]["future"],
+                           "change":temp[project]["change"]})
+        df.ix[0,"initial"] = df.ix[0][["stock","future","change"]].sum()
         df.fillna(0,inplace=True)
         df.loc[df["initial"]==0,"initial"] = 1+ df.loc[df["initial"]==0,"change"]/df[df["initial"]==0][["stock","future"]].sum(axis=1) 
         df.loc[:,"initial"] = df["initial"].cumprod()
-        rst[project]["净值"] = df.ix[-1][["stock","future"]].sum() /df.ix[-1,"initial"]
-#         rst[project]["股票敞口"] = rst[project]["股票持仓"] - 
-         
-#     产品名、总资产、净值、总盈亏率、股票盈亏、对冲盈亏、期货盈亏、固收盈亏、股票敞口、期货敞口、股票多头占比、期货风险度、期货杠杆
-    
-    return render(request, 'product.html')
+        rst[project]["净值"] = df.ix[-1][["stock","future"]].sum()/df.ix[-1,"initial"]
+        rst[project]["股票敞口"] = 0
+        rst[project]["期货敞口"] = 0
+        rst[project]["股票多头占比"] = 0
+        rst[project]["期货风险度"] = 0
+        rst[project]["期货杠杆"] = 0
+        for i in fields[1:]:
+            rst[project][i] = ("%.3f" % rst[project][i]) 
+            
+    return render(request, 'product.html',{"data":rst,"fd":fields})
 
 def value(request,account):
     acc = Account.objects.get(name=account)
