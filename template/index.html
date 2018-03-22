@@ -2,6 +2,7 @@
 <html class="no-js">
 	<head>
 	{% include 'head.html' %}
+	<script src="/static/js/echarts.common.min.js"></script>
 	</head>
 
 <body>
@@ -10,17 +11,11 @@
 <div class=" admin-content">
 	
 		<div class="daohang">
-<!--  			<ul>
-				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs"> 首页 </li>
-				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">帮助中心<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
-				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">奖金管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
-				<li><button type="button" class="am-btn am-btn-default am-radius am-btn-xs">产品管理<a href="javascript: void(0)" class="am-close am-close-spin" data-am-modal-close="">×</a></button></li>
-			</ul>  -->
 		</div>
 	
   
 <div class="admin">
-   <div class="admin-index">
+<!--    <div class="admin-index">
       <dl data-am-scrollspy="{animation: 'slide-right', delay: 600}">
         <dt class="hs"><i class="am-icon-line-chart"></i></dt>
         <dd>{{data.total.day_profit}}</dd>
@@ -31,7 +26,7 @@
         <dd>{{data.total.total_profit}} </dd>
         <dd class="f12">累计收益</dd>
       </dl>
-    </div>
+    </div>--> 
     
     <div class="admin-biaoge">
       <div class="xinxitj">账户信息</div>
@@ -49,9 +44,9 @@
           </tr>
         </thead>
         <tbody>
-       	{% for account in data.values %}
+       	{% for key,account in data.items %}
 	         <tr>
-	            <td><a href="/value/{{product.name}}">{{account.账户名称}}</a></td>
+	            <td><a href="/value/{{key}}">{{account.账户名称}}</a></td>
 	            <td>{{account.起始时间}}</td>
 	            <td><a href="#">{{account.持仓个数}}</a></td>
 	            <td>{{account.持仓比例}}</td>
@@ -63,10 +58,45 @@
         {% endfor %}
         </tbody>
       </table>
+   
+   <div id="main" style="width: 700px;height:400px;"></div>
+    <script type="text/javascript">
+        var myChart = echarts.init(document.getElementById('main'));
+        var option = {
+            title: {
+                text: '{{name}} '
+            },
+            tooltip: {},
+            legend: {
+                data:['净值']
+            },
+            xAxis: {
+                data: {{x|safe }}
+            },
+            yAxis: {min:{{ymin}},
+            	    max:{{ymax}},
+            	    axisLabel: {
+                        formatter: function(value, index){
+                            return value.toFixed(3);
+                        }
+                    }
+            	    
+            },
+            	    
+            series: [{
+                name: '净值',
+                type: 'line',
+                data:{{y}}
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+    </script>
      
      
     </div>
-    <div class="shuju">
+   <div class="shuju">
       <div class="shujuone">
         <dl>
           <dt>股票资产：  {{data.stock.value}}</dt>

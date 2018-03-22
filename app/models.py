@@ -43,6 +43,7 @@ class Account(models.Model):
     
     rest_capital = models.FloatField(default=0,help_text="资金余额")
     total_assets = models.FloatField(default=0,help_text="总资产")
+    market_value = models.FloatField(default=0,help_text="最新市值")
     earnest_capital = models.FloatField(default=0,help_text="保证金")
     
     

@@ -18,6 +18,7 @@ import pandas as pd
 def product(request,project):
     accounts = Account.objects.filter(project=Project.objects.get(name=project)).all()
     rst = {}
+    temp_all = {"account":{},"change":{}}
     for acc in accounts:
         temp = {}
         changehistory = Moneyhistory.objects.filter(account=acc).all()
@@ -25,6 +26,7 @@ def product(request,project):
         money = acc.total_assets
         rest = acc.rest_capital
         earnest = acc.earnest_capital
+        market_value = acc.market_value
         
         for i in changehistory:
             initial += i.money
@@ -39,11 +41,11 @@ def product(request,project):
         rst[acc.name]["账户市值"] = "{:.1f}".format(money)
         
         if acc.type in ["股票","固收"]:
-            rst[acc.name]["持仓个数"] = StockHoldList.objects.filter(account=acc).count()
-            rst[acc.name]["持仓比例"] = "{:.2f}%".format(100*(1-rest/money))
+            rst[acc.name]["持仓个数"] = StockHoldList.objects.filter(account=acc,number__gt=0).count()
+            rst[acc.name]["持仓比例"] = "{:.2f}%".format(100*(market_value/money))
             temp["account"] = {i.date:i.total_assets for i in StockHistory.objects.filter(account=acc)}
         else:
-            rst[acc.name]["持仓个数"] = FuturesHoldList.objects.filter(account=acc).count()
+            rst[acc.name]["持仓个数"] = FuturesHoldList.objects.filter(account=acc,number__gt=0).count()
             rst[acc.name]["持仓比例"] = "{:.2f}%".format(100*earnest/money)
             temp["account"] = {i.date:i.total_assets for i in FuturesHistory.objects.filter(account=acc)}
         
@@ -51,18 +53,37 @@ def product(request,project):
             
         rst[acc.name]["累计收益"] = "{:.1f}".format(money - initial)
         
-        
+        for k in temp.keys():
+            for dt in temp[k].keys():
+                if temp_all[k].__contains__(dt):
+                    temp_all[k][dt] += temp[k][dt]
+                else:
+                    temp_all[k][dt] = temp[k][dt]
+                 
         df = pd.DataFrame(temp)
         df.ix[0,"initial"] = df.ix[0,"account"]
         df.fillna(0,inplace=True)
         filt = df["initial"]==0
-        df.loc[df["initial"]==0,"initial"] = 1+df.loc[filt,"change"]/(df.loc[filt,"account"]-df.loc[filt,"change"]) 
+        df.loc[filt,"initial"] = 1+df.loc[filt,"change"]/(df.loc[filt,"account"]-df.loc[filt,"change"]) 
         df.loc[:,"initial"] = df["initial"].cumprod()
         rst[acc.name]["最新净值"] = "{:.2f}".format(df.ix[-1]["account"]/df.ix[-1,"initial"])
         try:
             rst[acc.name]["今日收益"] = "{:.2f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"]-100))
         except:pass
-    return render(request, 'index.html',{"data":rst})
+    df_all = pd.DataFrame(temp_all)
+    df_all.ix[0,"initial"] = df_all.ix[0,"account"]
+    df_all.fillna(0,inplace=True)
+    filt = df_all["initial"]==0
+    df_all.loc[filt,"initial"] = 1+df_all.loc[filt,"change"]/(df_all.loc[filt,"account"]-df_all.loc[filt,"change"]) 
+    df_all.loc[:,"initial"] = df_all["initial"].cumprod()
+    values = df["account"]/df["initial"]
+        
+    return render(request, 'index.html',{"data":rst,
+                                         "x":[i.strftime('%Y-%m-%d') for i in values.index],
+                                         "y":[i for i in values.values],
+                                         "ymin":values.min(),
+                                         "ymax":values.max(),
+                                         "name":project})
 
 class holdlist(generics.GenericAPIView):
     """
@@ -192,17 +213,28 @@ def index(request):
     return render(request, 'product.html',{"data":rst,"fd":fields})
 
 def value(request,account):
+    temp = {}
     acc = Account.objects.get(name=account)
-    if acc.type == "股票":
-        rst = StockHistory.objects.filter(account=acc)
+    temp["change"] = {i.date:i.money for i in Moneyhistory.objects.filter(account=acc)}
+    
+    if acc.type in ["股票","固收"]:
+        temp["account"] = {i.date:i.total_assets for i in StockHistory.objects.filter(account=acc)}
     else:
-        rst = FuturesHistory.objects.filter(account=acc)
-    values = [[i.date,i.total_assets/acc.initial_capital] for i in rst]
-    values = sorted(values, key=lambda x:(x[0] ))
-    return render(request, 'value.html',{"x":[i[0].strftime('%Y-%m-%d') for i in values],
-                                         "y":[i[1] for i in values],
-                                         "ymin":min([i[1] for i in values]),
-                                         "ymax":max([i[1] for i in values]),
+        temp["account"] = {i.date:i.total_assets for i in FuturesHistory.objects.filter(account=acc)}
+    
+    df = pd.DataFrame(temp)
+    df.ix[0,"initial"] = df.ix[0,"account"]
+    df.fillna(0,inplace=True)
+    filt = df["initial"]==0
+    df.loc[df["initial"]==0,"initial"] = 1+df.loc[filt,"change"]/(df.loc[filt,"account"]-df.loc[filt,"change"]) 
+    df.loc[:,"initial"] = df["initial"].cumprod()
+    
+    values = df["account"]/df["initial"]
+        
+    return render(request, 'value.html',{"x":[i.strftime('%Y-%m-%d') for i in values.index],
+                                         "y":[i for i in values.values],
+                                         "ymin":values.min(),
+                                         "ymax":values.max(),
                                          "name":account})
 
 
