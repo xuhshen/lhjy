@@ -44,6 +44,7 @@ class AccountSerializer(serializers.ModelSerializer):
             instance.rest_capital=recorddata["rest_capital"]
             instance.total_assets=recorddata["total_assets"]
             
+            mfunc = lambda x:0 if type(x) is str else x
             for i in validated_data["holdlist"]:
                 shl,_ = StockHoldList.objects.get_or_create(account=instance,code=i[u"证券代码"])
                 i_data = {"name":i[u"证券名称"],
@@ -52,9 +53,9 @@ class AccountSerializer(serializers.ModelSerializer):
                           "buy_price":i[u"成本价"],
                           "cost":i[u"盈亏成本价"],
                           "current_price":i[u"当前价"],
-                          "market_value":i[u"最新市值"],
-                          "profit_loss":i[u"浮动盈亏"],
-                          "profit_loss_rate":i[u"盈亏比例(%)"],
+                          "market_value":mfunc(i[u"最新市值"]),
+                          "profit_loss":mfunc(i[u"浮动盈亏"]),
+                          "profit_loss_rate":mfunc(i[u"盈亏比例(%)"]),
                           "buy_financing_balance":i[u"融资买入证券实时余额"],
                           "rest_buy_financing":i[u"融资买入余额"],
                           "enable_buy_financing":i[u"融资买入可用"],
