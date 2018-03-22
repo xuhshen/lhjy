@@ -141,6 +141,7 @@ def index(request):
         project = acc.project.name
         money = acc.total_assets
         rest = acc.rest_capital
+        market_value = acc.market_value
         earnest = acc.earnest_capital
         
         initial = 0
@@ -163,7 +164,7 @@ def index(request):
             
         if acc.type == "股票":
             rst[project]["股票盈亏"]["value"] += money - initial
-            rst[project]["股票持仓"]["value"] += money - rest
+            rst[project]["股票持仓"]["value"] += market_value
         elif acc.type == "期货":
             rst[project]["期货盈亏"]["value"] += money - initial
             rst[project]["期货持仓"]["value"] += earnest
