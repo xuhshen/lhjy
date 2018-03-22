@@ -104,8 +104,6 @@ class holdlist(generics.GenericAPIView):
                     d["rate"] = "{:.2%}".format(d["useMargin"]/a["accountinfo"].total_assets)
                     d["direction"] = (lambda x :"买入" if x==2 else "卖出")(item.direction)
                     data[project]["期货"].append(d)
-#         
-#     
         return render(request, 'holdlist.html',{"data":data})
 
 

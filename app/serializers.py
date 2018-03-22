@@ -27,12 +27,12 @@ class AccountSerializer(serializers.ModelSerializer):
         if instance.type == "股票" or instance.type == "固收":
             recorddata = {"account":instance,
                           "date":date,
-                          "rest_capital":validated_data["market"].get(u"资金余额",-1),
-                          "enable_capital":validated_data["market"].get(u"可用资金",-1),
+                          "rest_capital":validated_data["market"].get(u"余额",-1),
+                          "enable_capital":validated_data["market"].get(u"可用",-1),
                           "frozen_capital":validated_data["market"].get(u"冻结资金",-1),
-                          "market_value":validated_data["market"].get(u"最新市值",-1),
+                          "market_value":validated_data["market"].get(u"参考市值",-1),
                           "total_assets":validated_data["market"].get(u"总资产",-1),
-                          "profit_loss":validated_data["market"].get(u"浮动盈亏",-1),
+                          "profit_loss":validated_data["market"].get(u"盈亏",-1),
                           "preferred_capital":validated_data["market"].get(u"可取资金",-1),
                           "margin_selling_capital":validated_data["market"].get(u"融券卖出资金",-1),
                           "counters_bought_number":validated_data["market"].get(u"取柜台可买数量",-1),}
