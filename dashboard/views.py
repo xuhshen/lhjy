@@ -68,7 +68,7 @@ def product(request,project):
         df.loc[:,"initial"] = df["initial"].cumprod()
         rst[acc.name]["最新净值"] = "{:.2f}".format(df.ix[-1]["account"]/df.ix[-1,"initial"])
         try:
-            rst[acc.name]["今日收益"] = "{:.2f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"]-100))
+            rst[acc.name]["今日收益"] = "{:.2f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"])-100)
         except:pass
     df_all = pd.DataFrame(temp_all)
     df_all.ix[0,"initial"] = df_all.ix[0,"account"]
