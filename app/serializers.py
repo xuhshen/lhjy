@@ -43,6 +43,7 @@ class AccountSerializer(serializers.ModelSerializer):
             StockHistory.objects.update_or_create(date=date,account=instance,defaults=recorddata)
             instance.rest_capital=recorddata["rest_capital"]
             instance.total_assets=recorddata["total_assets"]
+            instance.market_value=recorddata["market_value"]
             
             mfunc = lambda x:0 if type(x) is str else x
             for i in validated_data["holdlist"]:
