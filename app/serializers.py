@@ -113,7 +113,9 @@ class AccountSerializer(serializers.ModelSerializer):
                           "cost":i["PositionCost"],
                           "direction":i["PosiDirection"],
                           "profit_loss":i["PositionProfit"],
-                          "rate":i["MarginRateByMoney"]
+                          "rate":i["MarginRateByMoney"],
+                          "lastprice":i.get("LastPrice",0),
+                          "volumemultiple":i.get("VolumeMultiple",0)
                           }
                 FuturesHoldList.objects.update_or_create(account=instance,code=i["InstrumentID"],defaults=i_data)
             for obj in FuturesHoldList.objects.filter(account=instance):

@@ -244,6 +244,8 @@ class FuturesHoldList(models.Model):
     cost = models.FloatField(default=0,help_text="持仓成本")
     direction = models.FloatField(default=0,help_text="交易方向(2:买入 3:卖出)")
     profit_loss = models.FloatField(default=0,help_text="浮动盈亏")
+    lastprice = models.FloatField(default=0,help_text="最新价格")
+    volumemultiple = models.FloatField(default=0,help_text="合约乘数")
     
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
