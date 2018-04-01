@@ -14,6 +14,7 @@ from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework import permissions
 import collections
 import pandas as pd
+import math
 
 def product(request,project):
     accounts = Account.objects.filter(project=Project.objects.get(name=project)).all()
@@ -67,6 +68,10 @@ def product(request,project):
         df.loc[filt,"initial"] = 1+df.loc[filt,"change"]/(df.loc[filt,"account"]-df.loc[filt,"change"]) 
         df.loc[:,"initial"] = df["initial"].cumprod()
         rst[acc.name]["最新净值"] = "{:.3f}".format(df.ix[-1]["account"]/df.ix[-1,"initial"])
+        rst[acc.name]["年化收益"] = (df.ix[-1]["account"]/df.ix[-1,"initial"]-1)*100/df.shape[0]*250
+        rst[acc.name]["年化波动率"] = 100*((df["account"]/df["initial"]).shift(-1)/(df["account"]/df["initial"])-1).fillna(0).std()*math.sqrt(250)
+        rst[acc.name]["夏普率"] = "{:.2f}".format(rst[acc.name]["年化收益"]/rst[acc.name]["年化波动率"])
+        rst[acc.name]["年化收益"] = "{:.2f}%".format(rst[acc.name]["年化收益"])
         try:
             rst[acc.name]["今日收益"] = "{:.3f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"])-100)
         except:pass
