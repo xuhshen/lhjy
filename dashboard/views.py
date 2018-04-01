@@ -66,9 +66,9 @@ def product(request,project):
         filt = df["initial"]==0
         df.loc[filt,"initial"] = 1+df.loc[filt,"change"]/(df.loc[filt,"account"]-df.loc[filt,"change"]) 
         df.loc[:,"initial"] = df["initial"].cumprod()
-        rst[acc.name]["最新净值"] = "{:.2f}".format(df.ix[-1]["account"]/df.ix[-1,"initial"])
+        rst[acc.name]["最新净值"] = "{:.3f}".format(df.ix[-1]["account"]/df.ix[-1,"initial"])
         try:
-            rst[acc.name]["今日收益"] = "{:.2f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"])-100)
+            rst[acc.name]["今日收益"] = "{:.3f}%".format(100*(df.ix[-1]["account"]/df.ix[-1,"initial"])/(df.ix[-2]["account"]/df.ix[-2,"initial"])-100)
         except:pass
     df_all = pd.DataFrame(temp_all)
     df_all.ix[0,"initial"] = df_all.ix[0,"account"]
@@ -135,6 +135,11 @@ def index(request):
     fields = ["产品名字","总资产","净值","总盈亏率","总盈亏","股票盈亏","股票持仓",
               "对冲盈亏","对冲持仓","期货盈亏","期货持仓","固收盈亏","股票敞口",
               "期货敞口","股票多头占比","期货风险度","期货杠杆"]
+    ckfunc = lambda x,y: (x-y)/(x+y) if x+y >0 else 0
+    fxdfunc = lambda x,y,z: z/(x+y) if x+y >0 else 0
+    ggfunc = lambda x,y,z: (x+y)/z if z >0 else 0
+    gpckfunc = lambda x,y,z:(x-y+z)/(x+y-z) if (x+y-z)>0 else 0
+    gpdtzbfunc = lambda x,y,z: z/(x+y) if x+y >0 else 0
     for acc in accounts:
         changehistory = Moneyhistory.objects.filter(account=acc).all()
         
@@ -158,21 +163,45 @@ def index(request):
             temp[project]["stock"] = {}
             temp[project]["future"] = {}
             temp[project]["change"] = {}
+            temp[project]["对冲空头"] = 0
+            temp[project]["对冲多头"] = 0
+            temp[project]["期货多头"] = 0
+            temp[project]["期货空头"] = 0
+            temp[project]["期货总资金"] = 0
+            temp[project]["固收总资金"] = 0
+            temp[project]["对冲总资金"] = 0
+            temp[project]["股票总资金"] = 0
             rst[project]["产品名字"]["value"] = project
             rst[project]["总资产"]["value"] = money
             rst[project]["净值"]["value"] = 1
             
+            
         if acc.type == "股票":
             rst[project]["股票盈亏"]["value"] += money - initial
             rst[project]["股票持仓"]["value"] += market_value
+            temp[project]["股票总资金"] += money 
         elif acc.type == "期货":
             rst[project]["期货盈亏"]["value"] += money - initial
             rst[project]["期货持仓"]["value"] += earnest
+            temp[project]["期货总资金"] += money
+            holdlists = FuturesHoldList.objects.filter(account=acc).all()
+            for i in holdlists:
+                if i.direction == 2:
+                    temp[project]["期货多头"] += i.lastprice*i.volumemultiple*i.number
+                else :
+                    temp[project]["期货空头"] += i.lastprice*i.volumemultiple*i.number
         elif acc.type == "对冲":
             rst[project]["对冲盈亏"]["value"] += money - initial
             rst[project]["对冲持仓"]["value"] += earnest
+            temp[project]["对冲总资金"] += money
+            if i.direction == 2:
+                temp[project]["期货多头"] += i.lastprice*i.volumemultiple*i.number
+            else :
+                temp[project]["期货空头"] += i.lastprice*i.volumemultiple*i.number
+            
         else:
             rst[project]["固收盈亏"]["value"] += money - initial
+            temp[project]["固收总资金"] += money
         
         rst[project]["总盈亏"]["value"] += money - initial
         
@@ -203,12 +232,13 @@ def index(request):
         df.loc[df["initial"]==0,"initial"] = 1+ df.loc[df["initial"]==0,"change"]/(df[df["initial"]==0][["stock","future"]].sum(axis=1)-df.loc[df["initial"]==0,"change"]) 
         df.loc[:,"initial"] = df["initial"].cumprod()
         rst[project]["净值"]["value"] = df.ix[-1][["stock","future"]].sum()/df.ix[-1,"initial"]
-        rst[project]["股票敞口"]["value"] = 0
-        rst[project]["期货敞口"]["value"] = 0
-        rst[project]["股票多头占比"]["value"] = 0
-        rst[project]["期货风险度"]["value"] = 0
-        rst[project]["期货杠杆"]["value"] = 0
+        rst[project]["股票敞口"]["value"] = gpckfunc(rst[project]["股票持仓"]["value"],temp[project]["对冲多头"],temp[project]["对冲空头"])
+        rst[project]["期货敞口"]["value"] = ckfunc(temp[project]["期货多头"],temp[project]["期货空头"])
+        rst[project]["股票多头占比"]["value"] = gpdtzbfunc(temp[project]["股票总资金"],temp[project]["对冲总资金"],rst[project]["股票持仓"]["value"])
+        rst[project]["期货风险度"]["value"] = fxdfunc(temp[project]["固收总资金"],temp[project]["期货总资金"],rst[project]["期货持仓"]['value'])
+        rst[project]["期货杠杆"]["value"] = ggfunc(temp[project]["期货多头"],temp[project]["期货空头"],temp[project]["期货总资金"])
         rst[project]["产品名字"]["link"] = "/product/{}".format(project)
+        rst[project]["总盈亏率"]["value"] = rst[project]["总盈亏"]["value"]/rst[project]["总资产"]["value"]
         for i in fields[1:]:
             rst[project][i]["value"] = ("%.3f" % rst[project][i]["value"]) 
     return render(request, 'product.html',{"data":rst,"fd":fields})
