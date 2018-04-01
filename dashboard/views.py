@@ -20,7 +20,10 @@ def product(request,project):
     accounts = Account.objects.filter(project=Project.objects.get(name=project)).all()
     rst = {}
     temp_all = {"account":{},"change":{}}
+    dct = {"股票":0,"期货":0,"固收":0,"对冲":0}
+    lambda x: {""}
     for acc in accounts:
+        dct[acc.type] += 1
         temp = {}
         changehistory = Moneyhistory.objects.filter(account=acc).all()
         initial = 0
@@ -32,7 +35,7 @@ def product(request,project):
         for i in changehistory:
             initial += i.money
         rst[acc.name] = collections.OrderedDict()
-        rst[acc.name]["账户名称"] = "{}_{}_{}".format(project,acc.type,acc.name)
+        rst[acc.name]["账户名称"] = "{}_{}_{}".format(project,acc.type,dct[acc.type])
         rst[acc.name]["起始时间"] = acc.create_time.strftime('%Y-%m-%d')
         rst[acc.name]["持仓个数"] = 0
         rst[acc.name]["持仓比例"] = 0
