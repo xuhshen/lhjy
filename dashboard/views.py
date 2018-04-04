@@ -36,7 +36,7 @@ def product(request,project):
             initial += i.money
         rst[acc.name] = collections.OrderedDict()
         rst[acc.name]["账户名称"] = "{}_{}_{}".format(project,acc.type,dct[acc.type])
-        rst[acc.name]["起始时间"] = acc.create_time.strftime('%Y-%m-%d')
+        rst[acc.name]["起始时间"] = acc.starttime.strftime('%Y-%m-%d')
         rst[acc.name]["持仓个数"] = 0
         rst[acc.name]["持仓比例"] = 0
         rst[acc.name]["今日收益"] = 0

@@ -46,7 +46,7 @@ class Account(models.Model):
     market_value = models.FloatField(default=0,help_text="最新市值")
     earnest_capital = models.FloatField(default=0,help_text="保证金")
     
-    starttime = models.DateTimeField(blank=True)
+    starttime = models.DateField()
     create_time = models.DateTimeField(auto_now_add=True)
     lastupdate_time = models.DateTimeField(auto_now=True)
     
