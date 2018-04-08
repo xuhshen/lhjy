@@ -56,6 +56,7 @@
 </div>
 
     <form class="am-form am-g">
+    {% if stockdata %}
           <table width="100%" class="am-table am-table-bordered am-table-radius am-table-striped">
             <thead>
               <tr class="">
@@ -64,43 +65,38 @@
                 <th class="table-type">市值</th>
                 <th class="table-type">数量</th>
                 <th class="table-type">占比</th>
- <!--                 <th class="table-type">总盈亏</th>
-                <th class="table-type">当日盈亏</th>-->
               </tr>
             </thead>
             <tbody>
-             {% for i in data.自营.股票 %}
+             {% for i in stockdata %}
               <tr>
                 
                 <td>{{i.code}}</td>
                 <td>{{i.name}}</td>
-                <td>{{i.value}}</td>
+                <td>{{i.market_value}}</td>
                 <td>{{i.number}}</td>
                 <td>{{i.profit_loss}}</td>
-       <!--          <td>10%</td>
-                <td>0.05%</td>-->
               </tr>
               {% endfor %}
             </tbody>
           </table>
-          
+         {% endif %}
+     {% if futuredata %}     
         <table width="100%" class="am-table am-table-bordered am-table-radius am-table-striped">
             <thead>
               <tr class="">
                 <th class="table-type">期货代码</th>
                 <th class="table-type">持仓数量</th>
-        <!--        <th class="table-type">净持仓</th> --> 
                 <th class="table-type">盈利</th>
                 <th class="table-type">保证金</th>
                 <th class="table-type">保证金占比</th>
-          <!--       <th class="table-type">总市值</th>-->
                 <th class="table-type">方向</th>
               </tr>
             </thead>
             <tbody>
-            {% for i in data.自营.期货 %}
+            {% for i in futuredata %}
               <tr>
-                <td>{{i.name}}</td>
+                <td>{{i.code}}</td>
                 <td>{{i.number}}</td>
                 <td>{{i.profit_loss}}</td>
                 <td>{{i.useMargin}}</td>
@@ -110,6 +106,8 @@
              {% endfor %}
             </tbody>
           </table>
+          
+          {% endif %}
         
         
         

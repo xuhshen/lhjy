@@ -21,7 +21,6 @@ def product(request,project):
     rst = {}
     temp_all = {"account":{},"change":{}}
     dct = {"股票":0,"期货":0,"固收":0,"对冲":0}
-    lambda x: {""}
     for acc in accounts:
         dct[acc.type] += 1
         temp = {}
@@ -35,6 +34,7 @@ def product(request,project):
         for i in changehistory:
             initial += i.money
         rst[acc.name] = collections.OrderedDict()
+        rst[acc.name]["account"] = acc.account
         rst[acc.name]["账户名称"] = "{}_{}_{}".format(project,acc.type,dct[acc.type])
         rst[acc.name]["起始时间"] = acc.starttime.strftime('%Y-%m-%d')
         rst[acc.name]["持仓个数"] = 0
@@ -93,47 +93,64 @@ def product(request,project):
                                          "ymax":values.max(),
                                          "name":project})
 
-class holdlist(generics.GenericAPIView):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-#     permission_classes = (permissions.IsAdminUser,)
-     
-    queryset = Account.objects.all()
-    serializer_class = IndexSerializer
-    
-    def get(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        serializer = self.get_serializer(queryset, many=True)
-        data = {}
-        for a in serializer.data:
-            project = a["project"]
-#             name = a["name"]
-            if not data.__contains__(project):
-                data[project] = {"股票":[],
-                                 "期货":[]}
-            
-            if a["type"] == "股票":
-                for item in a["holdlist"]:
-                    d = {}
-                    d["code"] = item.code
-                    d["name"] = item.name
-                    d["value"] = item.market_value
-                    d["number"] = item.number
-                    d["profit_loss"] = "{:.2f}".format(item.profit_loss)
-                    data[project]["股票"].append(d)
-            else:
-                for item in a["holdlist"]:
-                    if "&" in item.code:continue
-                    d = {}
-                    d["name"] = item.code
-                    d["useMargin"] =  item.useMargin
-                    d["number"] = item.number
-                    d["profit_loss"] = "{:.2f}".format(item.profit_loss)
-                    d["rate"] = "{:.2%}".format(d["useMargin"]/a["accountinfo"].total_assets)
-                    d["direction"] = (lambda x :"买入" if x==2 else "卖出")(item.direction)
-                    data[project]["期货"].append(d)
-        return render(request, 'holdlist.html',{"data":data})
+def holdlist(request,account):
+    acc = Account.objects.get(account=account)
+    futuredata = []
+    stockdata = []
+    if acc.type in ["股票","固收"]:
+        stockdata = [i for i in StockHoldList.objects.filter(number__gt=0).all()]
+    else:
+        futuredata = [{"code":i.code,
+                       "useMargin":i.useMargin,
+                       "number":i.number,
+                       "profit_loss":"{:.2f}".format(i.profit_loss),
+                       "rate":"{:.2%}".format(i.useMargin/acc.total_assets),
+                       "direction": (lambda x :"买入" if x==2 else "卖出")(i.direction)}  \
+                       for i in FuturesHoldList.objects.filter(number__gt=0).all() if "&" not in i.code
+                      ]
+    return render(request, 'holdlist.html',{"stockdata":stockdata,"futuredata":futuredata})
+
+# class holdlist(generics.GenericAPIView):
+#     """
+#     API endpoint that allows users to be viewed or edited.
+#     """
+# #     permission_classes = (permissions.IsAdminUser,)
+#      
+#     queryset = Account.objects.all()
+#     serializer_class = IndexSerializer
+#     
+#     def get(self, request, *args, **kwargs):
+#         queryset = self.filter_queryset(self.get_queryset())
+#         serializer = self.get_serializer(queryset, many=True)
+#         data = {}
+#         for a in serializer.data:
+#             project = a["project"]
+# #             name = a["name"]
+#             if not data.__contains__(project):
+#                 data[project] = {"股票":[],
+#                                  "期货":[]}
+#             
+#             if a["type"] == "股票":
+#                 for item in a["holdlist"]:
+#                     d = {}
+#                     d["code"] = item.code
+#                     d["name"] = item.name
+#                     d["value"] = item.market_value
+#                     d["number"] = item.number
+#                     d["profit_loss"] = "{:.2f}".format(item.profit_loss)
+#                     data[project]["股票"].append(d)
+#             else:
+#                 for item in a["holdlist"]:
+#                     if "&" in item.code:continue
+#                     d = {}
+#                     d["name"] = item.code
+#                     d["useMargin"] =  item.useMargin
+#                     d["number"] = item.number
+#                     d["profit_loss"] = "{:.2f}".format(item.profit_loss)
+#                     d["rate"] = "{:.2%}".format(d["useMargin"]/a["accountinfo"].total_assets)
+#                     d["direction"] = (lambda x :"买入" if x==2 else "卖出")(item.direction)
+#                     data[project]["期货"].append(d)
+#         return render(request, 'holdlist.html',{"data":data})
 
 
 def index(request):
