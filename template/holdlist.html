@@ -65,6 +65,7 @@
                 <th class="table-type">市值</th>
                 <th class="table-type">数量</th>
                 <th class="table-type">占比</th>
+                <th class="table-type">盈亏</th>
               </tr>
             </thead>
             <tbody>
@@ -75,6 +76,7 @@
                 <td>{{i.name}}</td>
                 <td>{{i.market_value}}</td>
                 <td>{{i.number}}</td>
+                <td>{{i.rate}}</td>
                 <td>{{i.profit_loss}}</td>
               </tr>
               {% endfor %}

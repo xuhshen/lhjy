@@ -98,7 +98,13 @@ def holdlist(request,account):
     futuredata = []
     stockdata = []
     if acc.type in ["股票","固收"]:
-        stockdata = [i for i in StockHoldList.objects.filter(number__gt=0).all()]
+        stockdata = [{"code":i.code,
+                      "name":i.name,
+                      "market_value":i.market_value,
+                      "number":i.number,
+                      "profit_loss":i.profit_loss,
+                      "rate":"{:.2%}".format(i.market_value/acc.total_assets)} for i in StockHoldList.objects.filter(number__gt=0).all()]
+        
     else:
         futuredata = [{"code":i.code,
                        "useMargin":i.useMargin,
