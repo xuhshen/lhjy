@@ -103,6 +103,7 @@ def holdlist(request,account):
                       "market_value":i.market_value,
                       "number":i.number,
                       "profit_loss":i.profit_loss,
+                      "color":(lambda x :True if x >=0 else False)(i.profit_loss),
                       "rate":"{:.2%}".format(i.market_value/acc.total_assets)} for i in StockHoldList.objects.filter(number__gt=0).all()]
         
     else:
@@ -110,6 +111,7 @@ def holdlist(request,account):
                        "useMargin":i.useMargin,
                        "number":i.number,
                        "profit_loss":"{:.2f}".format(i.profit_loss),
+                       "color":(lambda x :True if x >=0 else False)(i.profit_loss),
                        "rate":"{:.2%}".format(i.useMargin/acc.total_assets),
                        "direction": (lambda x :"买入" if x==2 else "卖出")(i.direction)}  \
                        for i in FuturesHoldList.objects.filter(number__gt=0).all() if "&" not in i.code
@@ -158,7 +160,10 @@ def holdlist(request,account):
 #                     data[project]["期货"].append(d)
 #         return render(request, 'holdlist.html',{"data":data})
 
-
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+@api_view(['GET'])
+@permission_classes((IsAuthenticated, ))
 def index(request):
     rst = collections.OrderedDict()
     temp = {}

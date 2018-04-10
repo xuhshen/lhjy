@@ -70,7 +70,7 @@
             </thead>
             <tbody>
              {% for i in stockdata %}
-              <tr>
+                <tr {% if i.color %} style="color:red" {% else %} style="color:blue" {% endif %} >
                 
                 <td>{{i.code}}</td>
                 <td>{{i.name}}</td>
@@ -97,7 +97,7 @@
             </thead>
             <tbody>
             {% for i in futuredata %}
-              <tr>
+              <tr {% if i.color %} style="color:red" {% else %} style="color:blue" {% endif %}>
                 <td>{{i.code}}</td>
                 <td>{{i.number}}</td>
                 <td>{{i.profit_loss}}</td>
