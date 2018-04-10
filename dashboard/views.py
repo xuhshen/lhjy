@@ -160,10 +160,10 @@ def holdlist(request,account):
 #                     data[project]["期货"].append(d)
 #         return render(request, 'holdlist.html',{"data":data})
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import api_view, permission_classes
-@api_view(['GET'])
-@permission_classes((IsAuthenticated, ))
+# from rest_framework.permissions import IsAuthenticated
+# from rest_framework.decorators import api_view, permission_classes
+# @api_view(['GET'])
+# @permission_classes((IsAuthenticated, ))
 def index(request):
     rst = collections.OrderedDict()
     temp = {}
